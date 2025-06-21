@@ -1,10 +1,10 @@
-"use client"
 
-import type React from "react"
+"use client"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search } from "lucide-react"
+import { Search, Sparkles, Zap, Star, TrendingUp } from "lucide-react"
+import Link from "next/link"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
@@ -16,100 +16,116 @@ export function HeroSection() {
     e.preventDefault()
     if (searchQuery.trim()) {
       router.push(`/buscar?q=${encodeURIComponent(searchQuery.trim())}`)
-    } else {
-      // Se não há termo de busca, vai para a página de explorar
-      router.push("/buscar")
     }
   }
 
+  const popularCategories = [
+    { name: "Midjourney", count: "15,800+", href: "/prompts/midjourney" },
+    { name: "ChatGPT", count: "22,400+", href: "/prompts/chatgpt" },
+    { name: "DALL-E", count: "11,200+", href: "/prompts/dalle" },
+    { name: "Claude", count: "9,700+", href: "/prompts/claude" },
+  ]
+
   return (
-    <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-black py-20">
-      <div className="container mx-auto px-4 text-center">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-            O Maior Marketplace de <span className="animated-gradient-text">Prompts de IA</span> do Brasil
-          </h1>
-
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Descubra, compre e venda os melhores prompts para ChatGPT, Claude, Midjourney e outras IAs. Transforme suas
-            ideias em resultados incríveis.
-          </p>
-
-          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <Input
-                placeholder="Ex: prompts para marketing, design, código..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-12 text-lg bg-gray-800 border-gray-700 text-white placeholder:text-gray-400"
-              />
-            </div>
-            <Button
-              type="submit"
-              size="lg"
-              className="h-12 px-8 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-            >
-              Buscar Prompts
-            </Button>
-          </form>
-        </div>
+    <section className="relative bg-gradient-to-br from-gray-900 via-purple-900/20 to-blue-900/20 pt-20 pb-16">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"></div>
       </div>
 
-      <style jsx>{`
-        .animated-gradient-text {
-          background: linear-gradient(
-            45deg,
-            #dc2626,
-            #ea580c,
-            #d97706,
-            #ca8a04,
-            #65a30d,
-            #16a34a,
-            #059669,
-            #0891b2,
-            #0284c7,
-            #2563eb,
-            #4f46e5,
-            #7c3aed,
-            #9333ea,
-            #c026d3,
-            #db2777,
-            #e11d48
-          );
-          background-size: 400% 400%;
-          background-clip: text;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          animation: gradientShift 4s ease-in-out infinite;
-          font-weight: 800;
-          display: inline-block;
-          filter: brightness(1.2) saturate(1.3);
-        }
+      <div className="container mx-auto px-4 relative">
+        <div className="text-center max-w-4xl mx-auto mb-12">
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <Sparkles className="w-8 h-8 text-purple-400" />
+            <span className="text-purple-400 font-semibold text-lg">Marketplace #1 de Prompts IA</span>
+          </div>
+          
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+            Transforme suas
+            <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent"> ideias </span>
+            em realidade
+          </h1>
+          
+          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+            Descubra, compre e venda os melhores prompts para IA. Mais de <strong>50.000+ criadores</strong> confiam na nossa plataforma.
+          </p>
 
-        @keyframes gradientShift {
-          0% {
-            background-position: 0% 50%;
-            filter: hue-rotate(0deg) saturate(1.3) brightness(1.2);
-          }
-          25% {
-            background-position: 100% 50%;
-            filter: hue-rotate(90deg) saturate(1.5) brightness(1.3);
-          }
-          50% {
-            background-position: 100% 100%;
-            filter: hue-rotate(180deg) saturate(1.1) brightness(1.1);
-          }
-          75% {
-            background-position: 0% 100%;
-            filter: hue-rotate(270deg) saturate(1.4) brightness(1.2);
-          }
-          100% {
-            background-position: 0% 50%;
-            filter: hue-rotate(360deg) saturate(1.3) brightness(1.2);
-          }
-        }
-      `}</style>
+          {/* Search Bar */}
+          <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-8">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6" />
+              <Input
+                type="text"
+                placeholder="Busque por prompts, categorias ou criadores..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-12 pr-4 py-4 text-lg bg-white/10 border-white/20 text-white placeholder:text-gray-300 rounded-2xl backdrop-blur-sm"
+              />
+              <Button 
+                type="submit" 
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-xl"
+              >
+                Buscar
+              </Button>
+            </div>
+          </form>
+
+          {/* Quick Actions */}
+          <div className="flex flex-wrap justify-center gap-4 mb-12">
+            <Link href="/buscar?priceFilter=free">
+              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 rounded-xl">
+                <Zap className="w-4 h-4 mr-2" />
+                Prompts Gratuitos
+              </Button>
+            </Link>
+            <Link href="/buscar?sortBy=rating">
+              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 rounded-xl">
+                <Star className="w-4 h-4 mr-2" />
+                Mais Avaliados
+              </Button>
+            </Link>
+            <Link href="/buscar?sortBy=newest">
+              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 rounded-xl">
+                <TrendingUp className="w-4 h-4 mr-2" />
+                Novidades
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Popular Categories Grid */}
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-bold text-white text-center mb-8">Categorias Populares</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {popularCategories.map((category) => (
+              <Link
+                key={category.name}
+                href={category.href}
+                className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 transition-all duration-300"
+              >
+                <h3 className="text-white font-semibold text-lg mb-2 group-hover:text-purple-300 transition-colors">
+                  {category.name}
+                </h3>
+                <p className="text-gray-400 text-sm">{category.count} prompts</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA Section */}
+        <div className="text-center mt-16">
+          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 max-w-2xl mx-auto">
+            <h3 className="text-2xl font-bold text-white mb-4">Comece a vender seus prompts hoje</h3>
+            <p className="text-gray-300 mb-6">Junte-se a milhares de criadores que já monetizam sua criatividade.</p>
+            <Link href="/dashboard">
+              <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-8 py-3 rounded-xl">
+                Começar a Vender
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
     </section>
   )
 }
