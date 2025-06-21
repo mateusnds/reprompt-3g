@@ -12,7 +12,7 @@ interface FAQItem {
   category: "geral" | "pagamento" | "prompts" | "conta"
 }
 
-export default function FAQSection() {
+export function FAQSection() {
   const [openItems, setOpenItems] = useState<number[]>([])
 
   const toggleItem = (index: number) => {
@@ -156,3 +156,5 @@ export default function FAQSection() {
     </section>
   )
 }
+
+export default FAQSection

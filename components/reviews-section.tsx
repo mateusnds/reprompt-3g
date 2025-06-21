@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -28,7 +29,7 @@ interface ReviewsSectionProps {
   promptTitle: string
 }
 
-export default function ReviewsSection({ promptId, promptTitle }: ReviewsSectionProps) {
+export function ReviewsSection({ promptId, promptTitle }: ReviewsSectionProps) {
   const [reviews, setReviews] = useState<Review[]>([])
   const [ratingStats, setRatingStats] = useState<any>(null)
   const [showReviewForm, setShowReviewForm] = useState(false)
@@ -364,3 +365,5 @@ export default function ReviewsSection({ promptId, promptTitle }: ReviewsSection
     </div>
   )
 }
+
+export default ReviewsSection
