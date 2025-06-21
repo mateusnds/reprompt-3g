@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ChevronRight, Star, TrendingUp, Clock, Gift, Crown } from "lucide-react"
 import Link from "next/link"
-import { getFeaturedPrompts } from "@/lib/prompts-storage"
+import { getFeaturedPrompts } from '@/lib/database'
 import type { Prompt } from "@/lib/types"
 import { PromptCard } from "@/components/prompt/prompt-card"
 
@@ -41,6 +41,7 @@ export default function FeaturedPrompts() {
     return featuredPrompts
       .sort((a, b) => b.downloads - a.downloads)
       .slice(0, 6)
+      
   }
 
   const getNewestPrompts = () => {

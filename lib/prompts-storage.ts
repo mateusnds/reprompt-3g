@@ -1,17 +1,19 @@
-
 "use client"
 
-import { 
+// Redirecionar para as funções do database.ts
+export { 
   getPrompts, 
   getFeaturedPrompts, 
   getPromptsByCategory, 
-  getPromptBySlug,
-  createPrompt,
-  updatePrompt,
-  deletePrompt,
-  searchPrompts,
-  type DatabasePrompt 
+  getPromptBySlug, 
+  createPrompt, 
+  updatePrompt, 
+  deletePrompt, 
+  searchPrompts 
 } from './database'
+
+// Manter tipos para compatibilidade
+export type { DatabasePrompt as Prompt } from './database'
 
 export interface Prompt {
   id: string
@@ -40,7 +42,7 @@ export interface Prompt {
 }
 
 // Converter DatabasePrompt para Prompt
-const convertDatabasePrompt = (dbPrompt: DatabasePrompt): Prompt => ({
+const convertDatabasePrompt = (dbPrompt: Prompt): Prompt => ({
   id: dbPrompt.id,
   title: dbPrompt.title,
   description: dbPrompt.description,
