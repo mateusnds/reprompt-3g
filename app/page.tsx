@@ -1,16 +1,19 @@
 import { Metadata } from "next"
-import HeroSection from "@/components/hero-section"
-import FeaturedPrompts from "@/components/featured-prompts"
-import { MarketplaceStats } from "@/components/stats/marketplace-stats"
-import { TrustSignals } from "@/components/trust-signals"
-import { FAQSection } from "@/components/faq-section"
+import HeroSection from '@/components/hero-section'
+import FeaturedPrompts from '@/components/featured-prompts'
+import TrustSignals from '@/components/trust-signals'
+import ReviewsSection from '@/components/reviews-section'
+import FAQSection from '@/components/faq-section'
+import Footer from '@/components/footer'
+import Header from '@/components/header'
+import StructuredData from '@/components/structured-data'
 
 export const metadata: Metadata = {
   title: "RePrompt - Marketplace #1 de Prompts para IA | Midjourney, DALL-E, ChatGPT",
   description: "Descubra, compre e venda os melhores prompts para IA no maior marketplace do Brasil. Mais de 50.000 criadores confiam na nossa plataforma. Prompts para Midjourney, DALL-E, Stable Diffusion e ChatGPT.",
   keywords: [
     "prompts IA",
-    "marketplace prompts", 
+    "marketplace prompts",
     "midjourney prompts",
     "dalle prompts",
     "chatgpt prompts",
@@ -63,61 +66,20 @@ export const metadata: Metadata = {
 }
 
 export default function HomePage() {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "RePrompt",
-    description: "Marketplace #1 de prompts para IA no Brasil",
-    url: "https://reprompt.com",
-    potentialAction: {
-      "@type": "SearchAction",
-      target: "https://reprompt.com/buscar?q={search_term_string}",
-      "query-input": "required name=search_term_string",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "RePrompt",
-      url: "https://reprompt.com",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://reprompt.com/logo.png",
-      },
-    },
-  }
-
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-
-      <main className="min-h-screen bg-black">
-        {/* Hero Section */}
-        <section className="relative overflow-hidden">
+      <StructuredData type="homepage" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <Header />
+        <main>
           <HeroSection />
-        </section>
-
-        {/* Featured Prompts */}
-        <section className="py-20 bg-gray-900">
           <FeaturedPrompts />
-        </section>
-
-        {/* Marketplace Stats */}
-        <section className="py-20">
-          <MarketplaceStats />
-        </section>
-
-        {/* Trust Signals */}
-        <section className="py-20 bg-gray-900">
           <TrustSignals />
-        </section>
-
-        {/* FAQ Section */}
-        <section className="py-20">
+          <ReviewsSection />
           <FAQSection />
-        </section>
-      </main>
+        </main>
+        <Footer />
+      </div>
     </>
   )
 }
