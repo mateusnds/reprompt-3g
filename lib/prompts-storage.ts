@@ -1,19 +1,17 @@
+
 "use client"
 
-// Redirecionar para as funções do database.ts
-export { 
+import { 
   getPrompts, 
   getFeaturedPrompts, 
-  getPromptsByCategory, 
-  getPromptBySlug, 
-  createPrompt, 
-  updatePrompt, 
-  deletePrompt, 
-  searchPrompts 
+  getPromptsByCategory as getPromptsByCategoryFromDB, 
+  getPromptBySlug,
+  createPrompt,
+  updatePrompt,
+  deletePrompt,
+  searchPrompts as searchPromptsFromDB,
+  type DatabasePrompt 
 } from './database'
-
-// Manter tipos para compatibilidade
-export type { DatabasePrompt as Prompt } from './database'
 
 export interface Prompt {
   id: string
@@ -42,7 +40,7 @@ export interface Prompt {
 }
 
 // Converter DatabasePrompt para Prompt
-const convertDatabasePrompt = (dbPrompt: Prompt): Prompt => ({
+const convertDatabasePrompt = (dbPrompt: DatabasePrompt): Prompt => ({
   id: dbPrompt.id,
   title: dbPrompt.title,
   description: dbPrompt.description,
@@ -88,9 +86,9 @@ export const getFeaturedPromptsData = async (): Promise<Prompt[]> => {
   }
 }
 
-export const getPromptsByCategoryData = async (category: string): Promise<Prompt[]> => {
+export const getPromptsByCategory = async (category: string): Promise<Prompt[]> => {
   try {
-    const dbPrompts = await getPromptsByCategory(category)
+    const dbPrompts = await getPromptsByCategoryFromDB(category)
     return dbPrompts.map(convertDatabasePrompt)
   } catch (error) {
     console.error('Erro ao carregar prompts por categoria:', error)
@@ -108,7 +106,7 @@ export const getPromptBySlugData = async (category: string, slug: string): Promi
   }
 }
 
-export const searchPromptsData = async (
+export const searchPrompts = async (
   query: string, 
   filters?: {
     category?: string
@@ -117,7 +115,7 @@ export const searchPromptsData = async (
   }
 ): Promise<Prompt[]> => {
   try {
-    const dbPrompts = await searchPrompts(query, filters)
+    const dbPrompts = await searchPromptsFromDB(query, filters)
     return dbPrompts.map(convertDatabasePrompt)
   } catch (error) {
     console.error('Erro ao buscar prompts:', error)
@@ -154,8 +152,5 @@ export const deletePromptData = async (id: string): Promise<boolean> => {
   }
 }
 
-// Função para obter prompts por categoria (compatibilidade)
-export const getPromptsByCategory = getPromptsByCategoryData
-
-// Função para buscar prompts (compatibilidade)
-export const searchPrompts = searchPromptsData
+// Exportações diretas das funções do database para compatibilidade
+export { getFeaturedPrompts }
