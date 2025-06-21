@@ -5,7 +5,7 @@ import {
   getPrompts, 
   getFeaturedPrompts, 
   getPromptsByCategory as getPromptsByCategoryFromDB, 
-  getPromptBySlug,
+  getPromptBySlug as getPromptBySlugFromDB,
   createPrompt,
   updatePrompt,
   deletePrompt,
@@ -66,6 +66,7 @@ const convertDatabasePrompt = (dbPrompt: DatabasePrompt): Prompt => ({
   updated_at: dbPrompt.updated_at
 })
 
+// Exportar todas as funções necessárias
 export const getAllPrompts = async (): Promise<Prompt[]> => {
   try {
     const dbPrompts = await getPrompts()
@@ -96,9 +97,9 @@ export const getPromptsByCategory = async (category: string): Promise<Prompt[]> 
   }
 }
 
-export const getPromptBySlugData = async (category: string, slug: string): Promise<Prompt | null> => {
+export const getPromptBySlug = async (category: string, slug: string): Promise<Prompt | null> => {
   try {
-    const dbPrompt = await getPromptBySlug(category, slug)
+    const dbPrompt = await getPromptBySlugFromDB(category, slug)
     return dbPrompt ? convertDatabasePrompt(dbPrompt) : null
   } catch (error) {
     console.error('Erro ao carregar prompt por slug:', error)
@@ -152,5 +153,40 @@ export const deletePromptData = async (id: string): Promise<boolean> => {
   }
 }
 
-// Exportações diretas das funções do database para compatibilidade
+// Funções para incrementar views e downloads
+export const incrementViews = async (id: string): Promise<boolean> => {
+  try {
+    // Importar getPromptById do database
+    const { getPromptById } = await import('./database')
+    const prompt = await getPromptById(id)
+    if (!prompt) return false
+    
+    const updated = await updatePrompt(id, { 
+      views: prompt.views + 1 
+    })
+    return !!updated
+  } catch (error) {
+    console.error('Erro ao incrementar views:', error)
+    return false
+  }
+}
+
+export const incrementDownloads = async (id: string): Promise<boolean> => {
+  try {
+    // Importar getPromptById do database
+    const { getPromptById } = await import('./database')
+    const prompt = await getPromptById(id)
+    if (!prompt) return false
+    
+    const updated = await updatePrompt(id, { 
+      downloads: prompt.downloads + 1 
+    })
+    return !!updated
+  } catch (error) {
+    console.error('Erro ao incrementar downloads:', error)
+    return false
+  }
+}
+
+// Re-exportar getFeaturedPrompts diretamente
 export { getFeaturedPrompts }

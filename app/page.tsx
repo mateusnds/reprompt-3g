@@ -1,4 +1,3 @@
-
 import { Metadata } from "next"
 import HeroSection from "@/components/hero-section"
 import FeaturedPrompts from "@/components/featured-prompts"
@@ -54,7 +53,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "RePrompt - Marketplace #1 de Prompts para IA",
-    description: "Descubra, compre e venda os melhores prompts para IA no maior marketplace do Brasil.",
+    description: "Descubra, compre e venda os melhores prompts para IA no Brasil.",
     images: ["/images/twitter-image.jpg"],
     creator: "@reprompt",
   },
@@ -92,7 +91,7 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      
+
       <main className="min-h-screen bg-black">
         {/* Hero Section */}
         <section className="relative overflow-hidden">

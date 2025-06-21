@@ -1,27 +1,26 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ChevronRight, Star, TrendingUp, Clock, Gift, Crown } from "lucide-react"
-import Link from "next/link"
-import { getFeaturedPrompts } from '@/lib/database'
-import type { Prompt } from "@/lib/types"
-import { PromptCard } from "@/components/prompt/prompt-card"
+import { useEffect, useState } from 'react'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Heart, Download, Eye, Star } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { getFeaturedPromptsData, type Prompt } from '@/lib/prompts-storage'
 
-export default function FeaturedPrompts() {
-  const [featuredPrompts, setFeaturedPrompts] = useState<Prompt[]>([])
+const FeaturedPrompts = () => {
+  const [prompts, setPrompts] = useState<Prompt[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadPrompts = async () => {
       try {
-        const prompts = await getFeaturedPrompts()
-        setFeaturedPrompts(prompts)
+        setLoading(true)
+        const featuredPrompts = await getFeaturedPromptsData()
+        setPrompts(featuredPrompts)
       } catch (error) {
-        console.error("Erro ao carregar prompts:", error)
+        console.error('Erro ao carregar prompts em destaque:', error)
       } finally {
         setLoading(false)
       }
@@ -30,41 +29,26 @@ export default function FeaturedPrompts() {
     loadPrompts()
   }, [])
 
-  const getTopRatedPrompts = () => {
-    return featuredPrompts
-      .filter(p => p.rating >= 4.5)
-      .sort((a, b) => b.rating - a.rating)
-      .slice(0, 6)
-  }
-
-  const getTrendingPrompts = () => {
-    return featuredPrompts
-      .sort((a, b) => b.downloads - a.downloads)
-      .slice(0, 6)
-      
-  }
-
-  const getNewestPrompts = () => {
-    return featuredPrompts
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .slice(0, 6)
-  }
-
-  const getFreePrompts = () => {
-    return featuredPrompts
-      .filter(p => p.isFree)
-      .slice(0, 6)
-  }
-
   if (loading) {
     return (
-      <section className="py-20 bg-gray-950">
+      <section className="py-16 bg-gradient-to-b from-background to-secondary/20">
         <div className="container mx-auto px-4">
-          <div className="text-center">
-            <div className="animate-pulse">
-              <div className="h-8 bg-gray-800 rounded w-64 mx-auto mb-4"></div>
-              <div className="h-4 bg-gray-800 rounded w-96 mx-auto"></div>
-            </div>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Prompts em Destaque</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Descubra os prompts mais populares e bem avaliados da nossa comunidade
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Card key={i} className="h-96 animate-pulse">
+                <div className="bg-gray-300 h-48 rounded-t-lg"></div>
+                <CardContent className="p-4">
+                  <div className="bg-gray-300 h-4 mb-2 rounded"></div>
+                  <div className="bg-gray-300 h-3 mb-4 rounded"></div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
@@ -72,189 +56,105 @@ export default function FeaturedPrompts() {
   }
 
   return (
-    <section className="py-20 bg-gray-950">
+    <section className="py-16 bg-gradient-to-b from-background to-secondary/20">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Descubra os
-            <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent"> melhores prompts</span>
-          </h2>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Explore nossa seleção curada dos prompts mais populares, bem avaliados e recém-lançados
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold mb-4">Prompts em Destaque</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Descubra os prompts mais populares e bem avaliados da nossa comunidade
           </p>
         </div>
 
-        <Tabs defaultValue="trending" className="w-full">
-          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4 mb-12 bg-gray-900 border border-gray-700">
-            <TabsTrigger 
-              value="trending" 
-              className="flex items-center gap-2 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-            >
-              <TrendingUp className="w-4 h-4" />
-              <span className="hidden sm:inline">Trending</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="top-rated" 
-              className="flex items-center gap-2 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-            >
-              <Star className="w-4 h-4" />
-              <span className="hidden sm:inline">Top Rated</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="newest" 
-              className="flex items-center gap-2 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-            >
-              <Clock className="w-4 h-4" />
-              <span className="hidden sm:inline">Newest</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="free" 
-              className="flex items-center gap-2 data-[state=active]:bg-purple-600 data-[state=active]:text-white"
-            >
-              <Gift className="w-4 h-4" />
-              <span className="hidden sm:inline">Free</span>
-            </TabsTrigger>
-          </TabsList>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {prompts.map((prompt) => (
+            <Card key={prompt.id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
+              <div className="relative">
+                <Image
+                  src={prompt.thumbnail}
+                  alt={prompt.title}
+                  width={400}
+                  height={250}
+                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute top-2 right-2">
+                  <Badge variant={prompt.is_free ? "secondary" : "default"}>
+                    {prompt.is_free ? 'Grátis' : `R$ ${prompt.price.toFixed(2)}`}
+                  </Badge>
+                </div>
+                <div className="absolute top-2 left-2">
+                  <Badge variant="outline" className="bg-background/80 backdrop-blur-sm">
+                    {prompt.category}
+                  </Badge>
+                </div>
+              </div>
 
-          <TabsContent value="trending">
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg">
-                    <TrendingUp className="w-5 h-5 text-white" />
+              <CardHeader className="pb-2">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
+                      {prompt.title}
+                    </CardTitle>
+                    <CardDescription className="line-clamp-2 mt-1">
+                      {prompt.description}
+                    </CardDescription>
                   </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-white">Prompts em Alta</h3>
-                    <p className="text-gray-400">Os mais baixados nas últimas 24h</p>
+                  <Button variant="ghost" size="sm" className="shrink-0 ml-2">
+                    <Heart className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardHeader>
+
+              <CardContent className="py-2">
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                    <span>{prompt.rating.toFixed(1)}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Download className="h-3 w-3" />
+                    <span>{prompt.downloads}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Eye className="h-3 w-3" />
+                    <span>{prompt.views}</span>
                   </div>
                 </div>
-                <Link href="/buscar?sortBy=downloads">
-                  <Button variant="outline" className="border-gray-600 text-gray-300 hover:text-white">
-                    Ver Todos
-                    <ChevronRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {getTrendingPrompts().map((prompt) => (
-                  <PromptCard key={prompt.id} prompt={prompt} />
-                ))}
-              </div>
-            </div>
-          </TabsContent>
 
-          <TabsContent value="top-rated">
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-lg">
-                    <Star className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-white">Melhor Avaliados</h3>
-                    <p className="text-gray-400">Prompts com as maiores notas</p>
-                  </div>
+                <div className="flex items-center gap-2 mt-3">
+                  <Image
+                    src={prompt.author_avatar}
+                    alt={prompt.author}
+                    width={24}
+                    height={24}
+                    className="rounded-full"
+                  />
+                  <span className="text-sm text-muted-foreground">
+                    por {prompt.author}
+                  </span>
                 </div>
-                <Link href="/buscar?sortBy=rating">
-                  <Button variant="outline" className="border-gray-600 text-gray-300 hover:text-white">
-                    Ver Todos
-                    <ChevronRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {getTopRatedPrompts().map((prompt) => (
-                  <PromptCard key={prompt.id} prompt={prompt} />
-                ))}
-              </div>
-            </div>
-          </TabsContent>
+              </CardContent>
 
-          <TabsContent value="newest">
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-r from-green-500 to-teal-600 rounded-lg">
-                    <Clock className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-white">Recém-Lançados</h3>
-                    <p className="text-gray-400">Os prompts mais novos da plataforma</p>
-                  </div>
-                </div>
-                <Link href="/buscar?sortBy=newest">
-                  <Button variant="outline" className="border-gray-600 text-gray-300 hover:text-white">
-                    Ver Todos
-                    <ChevronRight className="w-4 h-4 ml-2" />
+              <CardFooter className="pt-2">
+                <Link href={`/prompt/${prompt.category}/${prompt.slug}`} className="w-full">
+                  <Button className="w-full">
+                    {prompt.is_free ? 'Ver Prompt' : 'Comprar Agora'}
                   </Button>
                 </Link>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {getNewestPrompts().map((prompt) => (
-                  <PromptCard key={prompt.id} prompt={prompt} />
-                ))}
-              </div>
-            </div>
-          </TabsContent>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
 
-          <TabsContent value="free">
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-r from-emerald-500 to-green-600 rounded-lg">
-                    <Gift className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-white">Prompts Gratuitos</h3>
-                    <p className="text-gray-400">Experimente sem custo algum</p>
-                  </div>
-                </div>
-                <Link href="/buscar?priceFilter=free">
-                  <Button variant="outline" className="border-gray-600 text-gray-300 hover:text-white">
-                    Ver Todos
-                    <ChevronRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {getFreePrompts().map((prompt) => (
-                  <PromptCard key={prompt.id} prompt={prompt} />
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-
-        {/* Call to Action */}
-        <div className="text-center mt-16">
-          <Card className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border-purple-500/20 max-w-3xl mx-auto">
-            <CardContent className="p-8">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <Crown className="w-6 h-6 text-yellow-400" />
-                <span className="text-yellow-400 font-semibold">Marketplace Premium</span>
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-4">
-                Não encontrou o que procurava?
-              </h3>
-              <p className="text-gray-300 mb-6">
-                Explore nossa coleção completa com mais de 25.000 prompts em todas as categorias
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/buscar">
-                  <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
-                    Explorar Todos os Prompts
-                  </Button>
-                </Link>
-                <Link href="/dashboard">
-                  <Button variant="outline" className="border-gray-600 text-gray-300 hover:text-white">
-                    Vender Seus Prompts
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="text-center mt-12">
+          <Link href="/explorar">
+            <Button variant="outline" size="lg">
+              Ver Todos os Prompts
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
   )
 }
+
+export default FeaturedPrompts

@@ -322,6 +322,23 @@ export const updatePrompt = async (id: string, updates: Partial<DatabasePrompt>)
   }
 }
 
+export const getPromptById = async (id: string): Promise<DatabasePrompt | null> => {
+  try {
+    const supabase = getSupabase()
+    const { data, error } = await supabase
+      .from('prompts')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (error) throw error
+    return data
+  } catch (error) {
+    console.error('Erro ao carregar prompt por ID:', error)
+    return null
+  }
+}
+
 export const deletePrompt = async (id: string): Promise<boolean> => {
   try {
     const supabase = getSupabase()
