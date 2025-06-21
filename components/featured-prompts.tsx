@@ -13,15 +13,25 @@ import { getFeaturedPromptsData, type Prompt } from '@/lib/prompts-storage'
 const FeaturedPrompts = () => {
   const [prompts, setPrompts] = useState<Prompt[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const loadPrompts = async () => {
       try {
         setLoading(true)
+        setError(null)
         const featuredPrompts = await getFeaturedPromptsData()
-        setPrompts(featuredPrompts)
+        
+        if (Array.isArray(featuredPrompts)) {
+          setPrompts(featuredPrompts)
+        } else {
+          console.error('Dados de prompts não são um array:', featuredPrompts)
+          setPrompts([])
+        }
       } catch (error) {
         console.error('Erro ao carregar prompts em destaque:', error)
+        setError('Erro ao carregar prompts')
+        setPrompts([])
       } finally {
         setLoading(false)
       }
@@ -39,7 +49,7 @@ const FeaturedPrompts = () => {
               Prompts em Destaque
             </h2>
             <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-              Descubra os prompts mais populares e bem avaliados da nossa comunidade
+              Carregando os prompts mais populares...
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -53,6 +63,40 @@ const FeaturedPrompts = () => {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <section className="py-16 featured-prompts">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4 gradient-text">
+              Prompts em Destaque
+            </h2>
+            <p className="text-xl text-red-400 max-w-2xl mx-auto">
+              {error}. Tente novamente mais tarde.
+            </p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (!prompts || prompts.length === 0) {
+    return (
+      <section className="py-16 featured-prompts">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4 gradient-text">
+              Prompts em Destaque
+            </h2>
+            <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+              Nenhum prompt em destaque encontrado no momento.
+            </p>
           </div>
         </div>
       </section>

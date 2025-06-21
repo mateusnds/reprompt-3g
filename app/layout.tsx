@@ -1,87 +1,72 @@
+import { Inter } from 'next/font/google'
+import './globals.css'
+import { Metadata } from 'next'
 
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/toaster"
-
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://reprompt.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://reprompt.com'),
   title: {
-    default: "RePrompt - Marketplace #1 de Prompts para IA | Midjourney, DALL-E, ChatGPT",
-    template: "%s | RePrompt"
+    default: 'RePrompt - Marketplace #1 de Prompts para IA',
+    template: '%s | RePrompt'
   },
-  description: "Descubra, compre e venda os melhores prompts para IA no maior marketplace do Brasil. Mais de 50.000 criadores confiam na nossa plataforma. Prompts para Midjourney, DALL-E, Stable Diffusion e ChatGPT.",
+  description: 'Descubra, compre e venda os melhores prompts para IA no maior marketplace do Brasil. Mais de 50.000 criadores confiam na nossa plataforma.',
   keywords: [
-    "prompts IA",
-    "marketplace prompts", 
-    "midjourney prompts",
-    "dalle prompts",
-    "chatgpt prompts",
-    "stable diffusion prompts",
-    "inteligência artificial",
-    "geração de imagens",
-    "prompts premium",
-    "prompts profissionais",
-    "leonardo ai prompts",
-    "prompts brasileiros",
-    "criação de arte com IA",
-    "prompts para designers",
-    "marketplace brasileiro"
+    'prompts IA',
+    'marketplace prompts',
+    'midjourney prompts',
+    'dalle prompts',
+    'chatgpt prompts',
+    'stable diffusion prompts',
+    'inteligência artificial',
+    'geração de imagens',
+    'prompts premium',
+    'prompts profissionais'
   ],
-  authors: [{ name: "RePrompt Team", url: "https://reprompt.com" }],
-  creator: "RePrompt",
-  publisher: "RePrompt",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
+  authors: [{ name: 'RePrompt Team' }],
+  creator: 'RePrompt',
+  publisher: 'RePrompt',
   robots: {
     index: true,
     follow: true,
     googleBot: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
     },
   },
   openGraph: {
-    type: "website",
-    locale: "pt_BR",
-    url: "https://reprompt.com",
-    siteName: "RePrompt",
-    title: "RePrompt - Marketplace #1 de Prompts para IA",
-    description: "Descubra, compre e venda os melhores prompts para IA no maior marketplace do Brasil. Mais de 50.000 criadores confiam na nossa plataforma.",
+    type: 'website',
+    locale: 'pt_BR',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://reprompt.com',
+    siteName: 'RePrompt',
+    title: 'RePrompt - Marketplace #1 de Prompts para IA',
+    description: 'Descubra, compre e venda os melhores prompts para IA no maior marketplace do Brasil.',
     images: [
       {
-        url: "/images/og-image.jpg",
+        url: '/images/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: "RePrompt - Marketplace de Prompts para IA",
+        alt: 'RePrompt - Marketplace de Prompts para IA',
       },
     ],
   },
   twitter: {
-    card: "summary_large_image",
-    title: "RePrompt - Marketplace #1 de Prompts para IA",
-    description: "Descubra, compre e venda os melhores prompts para IA no maior marketplace do Brasil.",
-    images: ["/images/og-image.jpg"],
-    creator: "@reprompt_br",
-  },
-  verification: {
-    google: "google-site-verification-code",
+    card: 'summary_large_image',
+    title: 'RePrompt - Marketplace #1 de Prompts para IA',
+    description: 'Descubra, compre e venda os melhores prompts para IA no Brasil.',
+    images: ['/images/twitter-image.jpg'],
+    creator: '@reprompt',
   },
   alternates: {
-    canonical: "https://reprompt.com",
-    languages: {
-      'pt-BR': 'https://reprompt.com',
-    },
+    canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://reprompt.com',
   },
+  verification: {
+    google: 'your-google-verification-code',
+  },
+  category: 'technology',
 }
 
 export default function RootLayout({
@@ -90,26 +75,23 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang="pt-BR" className="dark">
       <head>
-        <link rel="canonical" href="https://reprompt.com" />
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#8b5cf6" />
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <meta name="theme-color" content="#000000" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+        <link rel="manifest" href="/manifest.json" />
+
+        {/* Preconnect para performance */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+
+        {/* Analytics e outras tags podem ser adicionadas aqui */}
       </head>
-      <body className={inter.className} suppressHydrationWarning>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          <div className="min-h-screen bg-background">
-            {children}
-          </div>
-          <Toaster />
-        </ThemeProvider>
+      <body className={`${inter.className} min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white`}>
+        {children}
       </body>
     </html>
   )

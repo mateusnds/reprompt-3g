@@ -1,3 +1,4 @@
+
 import { getPrompts, getFeaturedPrompts, getPromptsByCategory, getPromptBySlug } from './database'
 
 export interface Prompt {
@@ -149,3 +150,9 @@ export const incrementViews = async (promptId: string): Promise<void> => {
 export const incrementDownloads = async (promptId: string): Promise<void> => {
   console.log('Incrementing downloads for:', promptId)
 }
+
+// Aliases para compatibilidade (remover exportações duplicadas)
+export { getFeaturedPromptsData as getFeaturedPrompts }
+export { getPromptsByCategoryData as getPromptsByCategory }
+export { getPromptBySlugData as getPromptBySlug }
+export { searchPromptsData as searchPrompts }
