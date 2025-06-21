@@ -13,8 +13,6 @@ interface FAQItem {
 }
 
 export default function FAQSection() {
-
-export { FAQSection }
   const [openItems, setOpenItems] = useState<number[]>([])
 
   const toggleItem = (index: number) => {

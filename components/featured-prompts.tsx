@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useEffect, useState } from 'react'
@@ -8,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Heart, Download, Eye, Star } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { getFeaturedPromptsData, type Prompt } from '@/lib/prompts-storage'
+import { getFeaturedPromptsWithFallback, type Prompt } from '@/lib/prompts-storage'
 
 const FeaturedPrompts = () => {
   const [prompts, setPrompts] = useState<Prompt[]>([])
@@ -20,8 +19,8 @@ const FeaturedPrompts = () => {
       try {
         setLoading(true)
         setError(null)
-        const featuredPrompts = await getFeaturedPromptsData()
-        
+        const featuredPrompts = await getFeaturedPromptsWithFallback()
+
         if (Array.isArray(featuredPrompts)) {
           setPrompts(featuredPrompts)
         } else {
@@ -132,7 +131,7 @@ const FeaturedPrompts = () => {
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                
+
                 <div className="absolute top-3 right-3">
                   <Badge 
                     variant={prompt.is_free ? "secondary" : "default"}
@@ -141,7 +140,7 @@ const FeaturedPrompts = () => {
                     {prompt.is_free ? 'Grátis' : `R$ ${prompt.price.toFixed(2)}`}
                   </Badge>
                 </div>
-                
+
                 <div className="absolute top-3 left-3">
                   <Badge 
                     variant="outline" 
