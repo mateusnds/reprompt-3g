@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -12,11 +13,12 @@ import type { Prompt } from "@/lib/types"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { VideoPreview } from "@/components/video-preview"
+import { use } from "react"
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     categoria: string
-  }
+  }>
 }
 
 const categoryNames: { [key: string]: string } = {
@@ -34,19 +36,20 @@ const categoryNames: { [key: string]: string } = {
 }
 
 export default function CategoryPage({ params }: CategoryPageProps) {
+  const resolvedParams = use(params)
   const [prompts, setPrompts] = useState<Prompt[]>([])
   const [sortBy, setSortBy] = useState("newest")
   const [priceFilter, setPriceFilter] = useState("all")
   const [loading, setLoading] = useState(true)
 
-  const categoryName = categoryNames[params.categoria] || params.categoria
+  const categoryName = categoryNames[resolvedParams.categoria] || resolvedParams.categoria
 
   useEffect(() => {
     const loadCategoryPrompts = () => {
       setLoading(true)
       try {
         const results = searchPrompts("", {
-          category: params.categoria,
+          category: resolvedParams.categoria,
           priceFilter: priceFilter === "all" ? undefined : priceFilter,
           sortBy,
         })
@@ -60,7 +63,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     }
 
     loadCategoryPrompts()
-  }, [params.categoria, sortBy, priceFilter])
+  }, [resolvedParams.categoria, sortBy, priceFilter])
 
   return (
     <div className="min-h-screen bg-black">
@@ -146,13 +149,13 @@ export default function CategoryPage({ params }: CategoryPageProps) {
                       {prompt.videoUrl ? (
                         <VideoPreview
                           videoUrl={prompt.videoUrl}
-                          thumbnailUrl={prompt.images[0] || "/placeholder.svg"}
+                          thumbnailUrl={prompt.images?.[0] || "/placeholder.svg"}
                           title={prompt.title}
                           className="w-full h-48"
                         />
                       ) : (
                         <img
-                          src={prompt.images[0] || "/placeholder.svg"}
+                          src={prompt.images?.[0] || "/placeholder.svg"}
                           alt={prompt.title}
                           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                         />

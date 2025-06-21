@@ -1,3 +1,4 @@
+
 import type { Prompt } from './types'
 
 // Simulated data - in a real app this would come from a database
@@ -20,7 +21,8 @@ const samplePrompts: Prompt[] = [
     slug: 'retrato-fotorrealista',
     isFree: false,
     featured: true,
-    views: 5420
+    views: 5420,
+    images: ['/images/woman-portrait-preview.jpg']
   },
   {
     id: '2',
@@ -40,7 +42,8 @@ const samplePrompts: Prompt[] = [
     slug: 'marketing-copy-generator',
     isFree: true,
     featured: true,
-    views: 3210
+    views: 3210,
+    images: ['/placeholder.svg']
   },
   {
     id: '3',
@@ -60,7 +63,8 @@ const samplePrompts: Prompt[] = [
     slug: 'super-saiyan-character',
     isFree: false,
     featured: true,
-    views: 7800
+    views: 7800,
+    images: ['/images/super-saiyan-woman-preview.jpg']
   }
 ]
 
