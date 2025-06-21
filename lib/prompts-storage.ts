@@ -15,9 +15,12 @@ export interface Prompt {
   author: string
   authorAvatar: string
   thumbnail: string
+  images: string[]
   videoPreview?: string
   featured: boolean
   isPaid: boolean
+  isFree: boolean
+  isAdminCreated: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -38,9 +41,12 @@ const mockPrompts: Prompt[] = [
     author: "Maria Silva",
     authorAvatar: "/placeholder-user.jpg",
     thumbnail: "/images/woman-portrait-preview.jpg",
+    images: ["/images/woman-portrait-preview.jpg"],
     videoPreview: "/videos/portrait-demo.mp4",
     featured: true,
     isPaid: true,
+    isFree: false,
+    isAdminCreated: true,
     createdAt: new Date("2024-01-15"),
     updatedAt: new Date("2024-01-15")
   },
@@ -58,8 +64,11 @@ const mockPrompts: Prompt[] = [
     author: "Carlos Otaku",
     authorAvatar: "/placeholder-user.jpg",
     thumbnail: "/images/super-saiyan-woman-preview.jpg",
+    images: ["/images/super-saiyan-woman-preview.jpg"],
     featured: true,
     isPaid: false,
+    isFree: true,
+    isAdminCreated: false,
     createdAt: new Date("2024-01-10"),
     updatedAt: new Date("2024-01-10")
   },
@@ -77,8 +86,11 @@ const mockPrompts: Prompt[] = [
     author: "Ana Fantasy",
     authorAvatar: "/placeholder-user.jpg",
     thumbnail: "/images/cat-bird-jar-preview.jpg",
+    images: ["/images/cat-bird-jar-preview.jpg"],
     featured: true,
     isPaid: true,
+    isFree: false,
+    isAdminCreated: false,
     createdAt: new Date("2024-01-08"),
     updatedAt: new Date("2024-01-08")
   },
@@ -96,8 +108,11 @@ const mockPrompts: Prompt[] = [
     author: "Pedro Natura",
     authorAvatar: "/placeholder-user.jpg",
     thumbnail: "/images/jaguar-prompt-result.png",
+    images: ["/images/jaguar-prompt-result.png"],
     featured: false,
     isPaid: true,
+    isFree: false,
+    isAdminCreated: false,
     createdAt: new Date("2024-01-05"),
     updatedAt: new Date("2024-01-05")
   }
@@ -144,6 +159,17 @@ export const savePrompts = (prompts: Prompt[]): void => {
 export const getPromptById = (id: string): Prompt | undefined => {
   const prompts = getAllPrompts()
   return prompts.find(prompt => prompt.id === id)
+}
+
+export const getPromptBySlug = (category: string, slug: string): Prompt | undefined => {
+  const prompts = getAllPrompts()
+  return prompts.find(prompt => {
+    const promptSlug = prompt.title
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]/g, "")
+    return prompt.category === category && promptSlug === slug
+  })
 }
 
 export const searchPrompts = (query: string, filters?: any): Prompt[] => {
@@ -249,4 +275,14 @@ export const getFeaturedPrompts = (): Prompt[] => {
     .filter(prompt => prompt.featured)
     .sort((a, b) => b.rating - a.rating)
     .slice(0, 6)
+}
+
+export const incrementViews = (id: string): void => {
+  const prompts = getAllPrompts()
+  const index = prompts.findIndex(prompt => prompt.id === id)
+  
+  if (index !== -1) {
+    prompts[index].views += 1
+    savePrompts(prompts)
+  }
 }
