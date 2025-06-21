@@ -1,10 +1,11 @@
+
 import type { Metadata } from 'next'
 import './globals.css'
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
-import Header from "@/components/header"
-import Footer from "@/components/footer"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { initializeDatabase } from "@/lib/database"
 
 export const metadata: Metadata = {
@@ -73,7 +74,7 @@ export default function RootLayout({
         >
           <div className="min-h-screen bg-black">
             <Header />
-            <main>{children}</main>
+            <main className="flex-1">{children}</main>
             <Footer />
           </div>
           <Toaster />

@@ -65,7 +65,12 @@ function Header() {
                 className="pl-10 bg-gray-800 border-gray-700 text-white placeholder:text-gray-400"
               />
             </div>
-            <Button type="submit" size="sm" disabled={!searchQuery.trim()}>
+            <Button 
+              type="submit" 
+              size="sm" 
+              disabled={!searchQuery.trim()}
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+            >
               Buscar
             </Button>
           </form>
