@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.dev',
+  title: 'Reprompt - Marketplace de Prompts de IA',
+  description: 'O maior marketplace de prompts de IA do Brasil. Transforme suas ideias em realidade.',
+  generator: 'Reprompt',
 }
 
 export default function RootLayout({
@@ -13,8 +13,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="pt-BR">
+      <body className="bg-gray-900">{children}</body>
     </html>
   )
 }

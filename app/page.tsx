@@ -1,17 +1,16 @@
-import { Header } from "@/components/header"
 import { HeroSection } from "@/components/hero-section"
 import { FeaturedPrompts } from "@/components/featured-prompts"
-import { Footer } from "@/components/footer"
+import { ReviewsSection } from "@/components/reviews-section"
+import { MarketplaceStats } from "@/components/stats/marketplace-stats"
+import { MainLayout } from "@/components/layout/main-layout"
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-black">
-      <Header />
-      <main>
-        <HeroSection />
-        <FeaturedPrompts />
-      </main>
-      <Footer />
-    </div>
+    <MainLayout>
+      <HeroSection />
+      <FeaturedPrompts />
+      <MarketplaceStats />
+      <ReviewsSection />
+    </MainLayout>
   )
 }
