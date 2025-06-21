@@ -11,7 +11,7 @@ import { getFeaturedPrompts } from "@/lib/prompts-storage"
 import type { Prompt } from "@/lib/types"
 import { PromptCard } from "@/components/prompt/prompt-card"
 
-export function FeaturedPrompts() {
+export default function FeaturedPrompts() {
   const [featuredPrompts, setFeaturedPrompts] = useState<Prompt[]>([])
   const [loading, setLoading] = useState(true)
 

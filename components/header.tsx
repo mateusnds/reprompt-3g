@@ -24,7 +24,7 @@ const categories = [
   { name: "Sora", slug: "sora" },
 ]
 
-export function Header() {
+export default function Header() {
   const [searchQuery, setSearchQuery] = useState("")
   const [user, setUser] = useState<any>(null)
   const router = useRouter()

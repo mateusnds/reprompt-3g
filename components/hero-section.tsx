@@ -7,7 +7,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
-export function HeroSection() {
+export default function HeroSection() {
   const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
 
