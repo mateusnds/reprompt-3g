@@ -1,6 +1,11 @@
-
 import type { Metadata } from 'next'
 import './globals.css'
+import { Inter } from "next/font/google"
+import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
+import Header from "@/components/header"
+import Footer from "@/components/footer"
+import { initializeDatabase } from "@/lib/database"
 
 export const metadata: Metadata = {
   title: 'Reprompt - Marketplace #1 de Prompts de IA no Brasil | +25.000 Prompts Premium',
@@ -45,45 +50,34 @@ export const metadata: Metadata = {
   },
 }
 
+const inter = Inter({ subsets: ['latin'] })
+
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
+  // Initialize database on app start
+  if (typeof window !== "undefined") {
+    initializeDatabase()
+  }
+
   return (
-    <html lang="pt-BR">
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        <meta name="theme-color" content="#6B46C1" />
-        <link rel="canonical" href="https://reprompt.com.br" />
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <meta name="format-detection" content="telephone=no" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              "name": "Reprompt",
-              "url": "https://reprompt.com.br",
-              "description": "Marketplace líder de prompts de IA no Brasil",
-              "publisher": {
-                "@type": "Organization",
-                "name": "Reprompt",
-                "url": "https://reprompt.com.br"
-              },
-              "potentialAction": {
-                "@type": "SearchAction",
-                "target": "https://reprompt.com.br/buscar?q={search_term_string}",
-                "query-input": "required name=search_term_string"
-              }
-            })
-          }}
-        />
-      </head>
-      <body className="bg-gray-900 antialiased">
-        {children}
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="min-h-screen bg-black">
+            <Header />
+            <main>{children}</main>
+            <Footer />
+          </div>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   )
