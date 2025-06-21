@@ -51,23 +51,32 @@ export function HeroSection() {
           </p>
 
           {/* Search Bar */}
-          <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-8">
+          <form onSubmit={handleSearch} className="w-full max-w-2xl mx-auto mb-8" role="search">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6" />
+              <label htmlFor="main-search" className="sr-only">
+                Buscar prompts de IA por categoria, ferramenta ou estilo
+              </label>
               <Input
+                id="main-search"
                 type="text"
-                placeholder="Busque por prompts, categorias ou criadores..."
+                placeholder="Ex: 'retrato fotorrealístico', 'ChatGPT marketing', 'Midjourney paisagem'..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-4 py-4 text-lg bg-white/10 border-white/20 text-white placeholder:text-gray-300 rounded-2xl backdrop-blur-sm"
+                className="w-full h-14 pl-12 pr-32 text-lg bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-300 rounded-2xl focus:bg-white/20 transition-all"
+                autoComplete="off"
+                aria-describedby="search-help"
               />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-300" aria-hidden="true" />
               <Button 
-                type="submit" 
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-xl"
+                type="submit"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 h-10 rounded-xl transition-all duration-300"
               >
                 Buscar
               </Button>
             </div>
+            <p id="search-help" className="text-sm text-gray-400 mt-2 text-center">
+              Encontre prompts profissionais testados para suas necessidades específicas
+            </p>
           </form>
 
           {/* Quick Actions */}
