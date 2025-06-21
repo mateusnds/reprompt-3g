@@ -8,6 +8,11 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { initializeDatabase } from "@/lib/database"
 
+// Initialize database on app start
+if (typeof window !== "undefined") {
+  initializeDatabase()
+}
+
 export const metadata: Metadata = {
   title: 'Reprompt - Marketplace #1 de Prompts de IA no Brasil | +25.000 Prompts Premium',
   description: 'Descubra, compre e venda os melhores prompts para ChatGPT, Midjourney, DALL-E e mais. Marketplace brasileiro líder em prompts de IA com +50.000 criadores ativos. Transforme suas ideias em realidade.',
