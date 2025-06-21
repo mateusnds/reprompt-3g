@@ -16,7 +16,7 @@ const categories = [
   { name: "Sora", slug: "sora" },
 ]
 
-export default function Footer() {
+function Footer() {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-16">
@@ -149,3 +149,6 @@ export default function Footer() {
     </footer>
   )
 }
+
+export { Footer }
+export default Footer

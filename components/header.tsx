@@ -24,7 +24,7 @@ const categories = [
   { name: "Sora", slug: "sora" },
 ]
 
-export default function Header() {
+function Header() {
   const [searchQuery, setSearchQuery] = useState("")
   const [user, setUser] = useState<any>(null)
   const router = useRouter()
@@ -154,3 +154,6 @@ export default function Header() {
     </header>
   )
 }
+
+export { Header }
+export default Header
