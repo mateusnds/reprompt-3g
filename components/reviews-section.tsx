@@ -28,7 +28,9 @@ interface ReviewsSectionProps {
   promptTitle: string
 }
 
-export function ReviewsSection({ promptId, promptTitle }: ReviewsSectionProps) {
+export default function ReviewsSection({ promptId, promptTitle }: ReviewsSectionProps) {
+
+export { ReviewsSection }
   const [reviews, setReviews] = useState<Review[]>([])
   const [ratingStats, setRatingStats] = useState<any>(null)
   const [showReviewForm, setShowReviewForm] = useState(false)

@@ -5,7 +5,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Shield, Award, Users, Clock, Star, Zap } from "lucide-react"
 
-export function TrustSignals() {
+export default function TrustSignals() {
+
+export { TrustSignals }
   const trustFactors = [
     {
       icon: Shield,

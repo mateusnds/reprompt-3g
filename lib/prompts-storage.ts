@@ -1,5 +1,7 @@
 
-import { getPrompts, getFeaturedPrompts, getPromptsByCategory, getPromptBySlug } from './database'
+import { createClient } from '@/utils/supabase/client'
+
+const supabase = createClient()
 
 export interface Prompt {
   id: string
@@ -10,7 +12,6 @@ export interface Prompt {
   price: number
   is_paid: boolean
   is_free: boolean
-  is_admin_created: boolean
   featured: boolean
   author_id: string
   author: string
@@ -27,132 +28,163 @@ export interface Prompt {
   updated_at: string
 }
 
-interface DatabasePrompt {
+export interface Category {
   id: string
-  title: string
-  description: string
-  content: string
-  category: string
-  price: number
-  is_paid: boolean
-  is_free: boolean
-  is_admin_created: boolean
-  featured: boolean
-  author_id: string
-  author: string
-  author_avatar: string
-  thumbnail: string
-  images: string[]
-  video_preview?: string
-  tags: string[]
-  rating: number
-  downloads: number
-  views: number
+  name: string
   slug: string
-  created_at: string
-  updated_at: string
+  icon: string
+  description: string
+  count: number
 }
 
-const convertDatabasePrompt = (dbPrompt: DatabasePrompt): Prompt => ({
-  id: dbPrompt.id,
-  title: dbPrompt.title,
-  description: dbPrompt.description,
-  content: dbPrompt.content,
-  category: dbPrompt.category,
-  price: dbPrompt.price,
-  is_paid: dbPrompt.is_paid,
-  is_free: dbPrompt.is_free,
-  is_admin_created: dbPrompt.is_admin_created,
-  featured: dbPrompt.featured,
-  author_id: dbPrompt.author_id,
-  author: dbPrompt.author,
-  author_avatar: dbPrompt.author_avatar,
-  thumbnail: dbPrompt.thumbnail,
-  images: dbPrompt.images,
-  video_preview: dbPrompt.video_preview,
-  tags: dbPrompt.tags,
-  rating: dbPrompt.rating,
-  downloads: dbPrompt.downloads,
-  views: dbPrompt.views,
-  slug: dbPrompt.slug,
-  created_at: dbPrompt.created_at,
-  updated_at: dbPrompt.updated_at
-})
-
-// Função principal para carregar todos os prompts
-export const getAllPrompts = async (): Promise<Prompt[]> => {
+// Função para buscar prompts em destaque
+export async function getFeaturedPrompts(): Promise<Prompt[]> {
   try {
-    const dbPrompts = await getPrompts()
-    return dbPrompts.map(convertDatabasePrompt)
+    const { data, error } = await supabase
+      .from('prompts')
+      .select('*')
+      .eq('featured', true)
+      .order('created_at', { ascending: false })
+      .limit(6)
+
+    if (error) {
+      console.error('Erro ao buscar prompts em destaque:', error)
+      return []
+    }
+
+    return data || []
   } catch (error) {
-    console.error('Erro ao carregar prompts:', error)
+    console.error('Erro ao buscar prompts em destaque:', error)
     return []
   }
 }
 
-// Função para carregar prompts em destaque
-export const getFeaturedPromptsData = async (): Promise<Prompt[]> => {
+// Função para buscar prompt por slug
+export async function getPromptBySlug(category: string, slug: string): Promise<Prompt | null> {
   try {
-    const dbPrompts = await getFeaturedPrompts()
-    return dbPrompts.map(convertDatabasePrompt)
-  } catch (error) {
-    console.error('Erro ao carregar prompts em destaque:', error)
-    return []
-  }
-}
+    const { data, error } = await supabase
+      .from('prompts')
+      .select('*')
+      .eq('category', category)
+      .eq('slug', slug)
+      .single()
 
-// Função para carregar prompts por categoria
-export const getPromptsByCategoryData = async (category: string): Promise<Prompt[]> => {
-  try {
-    const dbPrompts = await getPromptsByCategory(category)
-    return dbPrompts.map(convertDatabasePrompt)
-  } catch (error) {
-    console.error('Erro ao carregar prompts por categoria:', error)
-    return []
-  }
-}
+    if (error) {
+      console.error('Erro ao buscar prompt por slug:', error)
+      return null
+    }
 
-// Função para carregar prompt específico por slug
-export const getPromptBySlugData = async (category: string, slug: string): Promise<Prompt | null> => {
-  try {
-    const dbPrompt = await getPromptBySlug(category, slug)
-    return dbPrompt ? convertDatabasePrompt(dbPrompt) : null
+    return data
   } catch (error) {
-    console.error('Erro ao carregar prompt por slug:', error)
+    console.error('Erro ao buscar prompt por slug:', error)
     return null
   }
 }
 
-// Função para buscar prompts
-export const searchPromptsData = async (query: string, category?: string): Promise<Prompt[]> => {
+// Função para buscar prompts por categoria
+export async function getPromptsByCategory(category: string): Promise<Prompt[]> {
   try {
-    const allPrompts = await getAllPrompts()
-    return allPrompts.filter(prompt => {
-      const matchesQuery = prompt.title.toLowerCase().includes(query.toLowerCase()) ||
-                          prompt.description.toLowerCase().includes(query.toLowerCase()) ||
-                          prompt.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
+    const { data, error } = await supabase
+      .from('prompts')
+      .select('*')
+      .eq('category', category)
+      .order('created_at', { ascending: false })
 
-      const matchesCategory = !category || prompt.category === category
+    if (error) {
+      console.error('Erro ao buscar prompts por categoria:', error)
+      return []
+    }
 
-      return matchesQuery && matchesCategory
-    })
+    return data || []
+  } catch (error) {
+    console.error('Erro ao buscar prompts por categoria:', error)
+    return []
+  }
+}
+
+// Função para buscar prompts
+export async function searchPrompts(query: string): Promise<Prompt[]> {
+  try {
+    const { data, error } = await supabase
+      .from('prompts')
+      .select('*')
+      .or(`title.ilike.%${query}%, description.ilike.%${query}%, tags.cs.{${query}}`)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Erro ao buscar prompts:', error)
+      return []
+    }
+
+    return data || []
   } catch (error) {
     console.error('Erro ao buscar prompts:', error)
     return []
   }
 }
 
-// Funções de incremento (placeholder - implementar depois)
-export const incrementViews = async (promptId: string): Promise<void> => {
-  console.log('Incrementing views for:', promptId)
+// Função para incrementar visualizações
+export async function incrementViews(promptId: string): Promise<void> {
+  try {
+    const { error } = await supabase.rpc('increment_views', { prompt_id: promptId })
+    
+    if (error) {
+      console.error('Erro ao incrementar visualizações:', error)
+    }
+  } catch (error) {
+    console.error('Erro ao incrementar visualizações:', error)
+  }
 }
 
-export const incrementDownloads = async (promptId: string): Promise<void> => {
-  console.log('Incrementing downloads for:', promptId)
+// Função para incrementar downloads
+export async function incrementDownloads(promptId: string): Promise<void> {
+  try {
+    const { error } = await supabase.rpc('increment_downloads', { prompt_id: promptId })
+    
+    if (error) {
+      console.error('Erro ao incrementar downloads:', error)
+    }
+  } catch (error) {
+    console.error('Erro ao incrementar downloads:', error)
+  }
 }
 
-// Aliases para compatibilidade (remover exportações duplicadas)
-export { getFeaturedPromptsData as getFeaturedPrompts }
-export { getPromptsByCategoryData as getPromptsByCategory }
-export { getPromptBySlugData as getPromptBySlug }
-export { searchPromptsData as searchPrompts }
+// Função para buscar todas as categorias
+export async function getCategories(): Promise<Category[]> {
+  try {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('name')
+
+    if (error) {
+      console.error('Erro ao buscar categorias:', error)
+      return []
+    }
+
+    return data || []
+  } catch (error) {
+    console.error('Erro ao buscar categorias:', error)
+    return []
+  }
+}
+
+// Função para buscar todos os prompts
+export async function getAllPrompts(): Promise<Prompt[]> {
+  try {
+    const { data, error } = await supabase
+      .from('prompts')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Erro ao buscar todos os prompts:', error)
+      return []
+    }
+
+    return data || []
+  } catch (error) {
+    console.error('Erro ao buscar todos os prompts:', error)
+    return []
+  }
+}

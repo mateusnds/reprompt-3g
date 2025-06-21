@@ -262,3 +262,27 @@ CREATE INDEX IF NOT EXISTS idx_prompts_featured ON prompts(featured);
 CREATE INDEX IF NOT EXISTS idx_prompts_slug ON prompts(slug);
 CREATE INDEX IF NOT EXISTS idx_reviews_prompt_id ON reviews(prompt_id);
 CREATE INDEX IF NOT EXISTS idx_tags_category ON tags(category);
+
+-- Função para incrementar visualizações
+CREATE OR REPLACE FUNCTION increment_views(prompt_id UUID)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  UPDATE prompts 
+  SET views = views + 1 
+  WHERE id = prompt_id;
+END;
+$$;
+
+-- Função para incrementar downloads
+CREATE OR REPLACE FUNCTION increment_downloads(prompt_id UUID)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  UPDATE prompts 
+  SET downloads = downloads + 1 
+  WHERE id = prompt_id;
+END;
+$$;
