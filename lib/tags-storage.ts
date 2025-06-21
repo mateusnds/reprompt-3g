@@ -91,6 +91,11 @@ export const updateTag = (id: string, updates: Partial<Tag>): Tag | null => {
   const updatedTag = { ...tags[index], ...updates }
   tags[index] = updatedTag
   saveTags(tags)
+  return updatedTagull
+
+  const updatedTag = { ...tags[index], ...updates }
+  tags[index] = updatedTag
+  saveTags(tags)
   return updatedTag
 }
 

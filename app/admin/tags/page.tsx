@@ -96,7 +96,7 @@ function TagsManagementContent() {
         category: "geral",
         isActive: true,
       })
-      setShowAddForm(false)
+      setShowAddForm(true)
       loadTags()
 
       // Limpar mensagem após 3 segundos
