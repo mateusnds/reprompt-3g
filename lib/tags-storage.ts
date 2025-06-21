@@ -1,3 +1,4 @@
+
 export interface Tag {
   id: string
   name: string
@@ -87,11 +88,6 @@ export const updateTag = (id: string, updates: Partial<Tag>): Tag | null => {
   const index = tags.findIndex((t) => t.id === id)
 
   if (index === -1) return null
-
-  const updatedTag = { ...tags[index], ...updates }
-  tags[index] = updatedTag
-  saveTags(tags)
-  return updatedTagull
 
   const updatedTag = { ...tags[index], ...updates }
   tags[index] = updatedTag

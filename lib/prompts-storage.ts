@@ -2,176 +2,294 @@
 import type { Prompt } from './types'
 
 // Simulated data - in a real app this would come from a database
-const prompts: Prompt[] = [
+const initialPrompts: Prompt[] = [
   {
     id: '1',
-    title: 'Retrato Fotorrealista Ultra HD',
-    description: 'Prompt profissional para criar retratos fotorrealísticos em ultra alta definição. Ideal para projetos comerciais e artísticos.',
-    prompt: 'Portrait of a [subject], ultra-realistic, photorealistic, 8K resolution, professional photography, studio lighting, sharp focus, detailed skin texture, natural expression',
+    title: 'Retrato Fotorrealista de Mulher',
+    description: 'Prompt para criar retratos fotorrealistas de mulheres com alta qualidade e detalhamento.',
+    prompt: 'professional portrait photography of a beautiful woman, photorealistic, high quality, detailed skin texture, natural lighting, 85mm lens, shallow depth of field, elegant pose',
+    price: 29.90,
     category: 'midjourney',
-    price: 15.99,
-    author: 'PrompterPro',
-    authorId: '1',
+    tags: ['retrato', 'mulher', 'fotorrealista'],
+    author: 'Admin',
+    authorId: 'admin',
     rating: 4.8,
-    downloads: 1234,
-    tags: ['retrato', 'fotorrealista', 'profissional', '8k', 'comercial'],
-    images: ['/images/woman-portrait-preview.jpg'],
-    createdAt: new Date('2024-01-15'),
+    downloads: 1250,
     slug: 'retrato-fotorrealista',
     isFree: false,
     featured: true,
     views: 5420,
-    isAdminCreated: false
+    images: ['/images/woman-portrait-preview.jpg'],
+    createdAt: new Date('2024-01-15'),
+    updatedAt: new Date('2024-01-15'),
+    isActive: true,
+    isAdminCreated: true
   },
   {
     id: '2',
-    title: 'Gerador de Copy para Marketing',
-    description: 'Prompt especializado em criar textos persuasivos para campanhas de marketing digital.',
-    prompt: 'Create compelling marketing copy for [product/service] targeting [audience]. Include emotional triggers, clear benefits, and strong call-to-action.',
-    category: 'chatgpt',
+    title: 'Gerador de Copy de Marketing',
+    description: 'Prompt para ChatGPT criar copies persuasivos para campanhas de marketing.',
+    prompt: 'Act as a professional copywriter. Create compelling marketing copy for [PRODUCT/SERVICE]. Focus on benefits, use emotional triggers, include a strong call-to-action. Target audience: [AUDIENCE]. Tone: [TONE].',
     price: 0,
-    author: 'MarketingGuru',
-    authorId: '2',
-    rating: 4.9,
-    downloads: 2156,
-    tags: ['marketing', 'copywriting', 'vendas', 'persuasão'],
-    images: ['/placeholder.svg'],
-    createdAt: new Date('2024-01-12'),
-    slug: 'gerador-de-copy-para-marketing',
+    category: 'chatgpt',
+    tags: ['marketing', 'copy', 'vendas'],
+    author: 'Admin',
+    authorId: 'admin',
+    rating: 4.6,
+    downloads: 890,
+    slug: 'marketing-copy-generator',
     isFree: true,
     featured: true,
     views: 3210,
-    isAdminCreated: false
+    images: ['/placeholder.svg'],
+    createdAt: new Date('2024-01-10'),
+    updatedAt: new Date('2024-01-10'),
+    isActive: true,
+    isAdminCreated: true
   },
   {
     id: '3',
     title: 'Personagem Super Saiyan Feminina',
-    description: 'Prompt para gerar personagens femininas no estilo Dragon Ball Z com transformação Super Saiyan.',
-    prompt: 'Female character in Dragon Ball Z style, Super Saiyan transformation, golden spiky hair, blue eyes, powerful aura, anime art style, detailed',
+    description: 'Prompt para criar personagens femininas no estilo Super Saiyan do Dragon Ball.',
+    prompt: 'anime style female super saiyan character, golden spiky hair flowing upward, intense blue eyes, muscular physique, energy aura surrounding body, dramatic lighting, action pose, detailed anime art style',
+    price: 19.90,
     category: 'midjourney',
-    price: 12.50,
-    author: 'AnimeArtist',
-    authorId: '3',
-    rating: 4.7,
-    downloads: 987,
-    tags: ['anime', 'dragon ball', 'super saiyan', 'personagem', 'feminino'],
-    images: ['/images/super-saiyan-woman-preview.jpg'],
-    createdAt: new Date('2024-01-10'),
+    tags: ['anime', 'super saiyan', 'personagem'],
+    author: 'Admin',
+    authorId: 'admin',
+    rating: 4.9,
+    downloads: 2100,
     slug: 'super-saiyan-character',
     isFree: false,
     featured: true,
     views: 7800,
-    isAdminCreated: false
+    images: ['/images/super-saiyan-woman-preview.jpg'],
+    createdAt: new Date('2024-01-20'),
+    updatedAt: new Date('2024-01-20'),
+    isActive: true,
+    isAdminCreated: true
   }
 ]
 
-export function getAllPrompts(): Prompt[] {
-  return prompts
-}
+const STORAGE_KEY = 'reprompt_prompts'
 
-export function getFeaturedPrompts(): Prompt[] {
-  return prompts.filter(prompt => prompt.featured)
-}
+// Initialize prompts
+export const initializePrompts = (): Prompt[] => {
+  if (typeof window === 'undefined') return initialPrompts
 
-export function getPromptById(id: string): Prompt | undefined {
-  return prompts.find(prompt => prompt.id === id)
-}
+  const stored = localStorage.getItem(STORAGE_KEY)
+  if (!stored) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(initialPrompts))
+    return initialPrompts
+  }
 
-export function getPromptBySlug(category: string, slug: string): Prompt | undefined {
-  return prompts.find(prompt => 
-    prompt.category === category && 
-    (prompt.slug === slug || prompt.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') === slug)
-  )
-}
-
-export function incrementViews(id: string): void {
-  const prompt = prompts.find(p => p.id === id)
-  if (prompt) {
-    prompt.views += 1
+  try {
+    const parsed = JSON.parse(stored)
+    return parsed.map((prompt: any) => ({
+      ...prompt,
+      createdAt: typeof prompt.createdAt === 'string' ? new Date(prompt.createdAt) : prompt.createdAt,
+      updatedAt: typeof prompt.updatedAt === 'string' ? new Date(prompt.updatedAt) : prompt.updatedAt,
+    }))
+  } catch {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(initialPrompts))
+    return initialPrompts
   }
 }
 
-export function searchPrompts(
-  query: string = "",
+// Get all prompts
+export const getAllPrompts = (): Prompt[] => {
+  return initializePrompts()
+}
+
+// Get active prompts only
+export const getActivePrompts = (): Prompt[] => {
+  return getAllPrompts().filter(prompt => prompt.isActive)
+}
+
+// Get featured prompts
+export const getFeaturedPrompts = (): Prompt[] => {
+  return getActivePrompts().filter(prompt => prompt.featured).slice(0, 6)
+}
+
+// Get prompt by slug
+export const getPromptBySlug = (slug: string): Prompt | null => {
+  const prompts = getAllPrompts()
+  return prompts.find(prompt => prompt.slug === slug) || null
+}
+
+// Get prompt by ID
+export const getPromptById = (id: string): Prompt | null => {
+  const prompts = getAllPrompts()
+  return prompts.find(prompt => prompt.id === id) || null
+}
+
+// Save prompts to storage
+export const savePrompts = (prompts: Prompt[]): void => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(prompts))
+  }
+}
+
+// Generate slug from title
+const generateSlug = (title: string): string => {
+  return title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+}
+
+// Add new prompt
+export const addPrompt = (prompt: Omit<Prompt, 'id' | 'slug'>): Prompt => {
+  const prompts = getAllPrompts()
+  const newPrompt: Prompt = {
+    ...prompt,
+    id: Date.now().toString(),
+    slug: generateSlug(prompt.title),
+  }
+
+  const updatedPrompts = [newPrompt, ...prompts]
+  savePrompts(updatedPrompts)
+  return newPrompt
+}
+
+// Update prompt
+export const updatePrompt = (id: string, updates: Partial<Prompt>): Prompt | null => {
+  const prompts = getAllPrompts()
+  const index = prompts.findIndex(p => p.id === id)
+  
+  if (index === -1) return null
+
+  const updatedPrompt = {
+    ...prompts[index],
+    ...updates,
+    updatedAt: new Date(),
+  }
+
+  // Update slug if title changed
+  if (updates.title) {
+    updatedPrompt.slug = generateSlug(updates.title)
+  }
+
+  prompts[index] = updatedPrompt
+  savePrompts(prompts)
+  return updatedPrompt
+}
+
+// Delete prompt
+export const deletePrompt = (id: string): boolean => {
+  const prompts = getAllPrompts()
+  const filteredPrompts = prompts.filter(p => p.id !== id)
+  
+  if (filteredPrompts.length === prompts.length) {
+    return false // Prompt not found
+  }
+  
+  savePrompts(filteredPrompts)
+  return true
+}
+
+// Search prompts
+export const searchPrompts = (
+  query: string = '',
   filters: {
     category?: string
     priceFilter?: string
     sortBy?: string
     tags?: string[]
   } = {}
-): Prompt[] {
-  let filtered = [...prompts]
+): Prompt[] => {
+  let results = getActivePrompts()
 
-  // Filter by query
-  if (query) {
-    const lowercaseQuery = query.toLowerCase()
-    filtered = filtered.filter(prompt =>
-      prompt.title.toLowerCase().includes(lowercaseQuery) ||
-      prompt.description.toLowerCase().includes(lowercaseQuery) ||
-      prompt.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
+  // Text search
+  if (query.trim()) {
+    const searchTerm = query.toLowerCase()
+    results = results.filter(prompt =>
+      prompt.title.toLowerCase().includes(searchTerm) ||
+      prompt.description.toLowerCase().includes(searchTerm) ||
+      prompt.tags.some(tag => tag.toLowerCase().includes(searchTerm))
     )
   }
 
-  // Filter by category
-  if (filters.category && filters.category !== 'all') {
-    filtered = filtered.filter(prompt => prompt.category === filters.category)
+  // Category filter
+  if (filters.category) {
+    results = results.filter(prompt => prompt.category === filters.category)
   }
 
-  // Filter by price
+  // Price filter
   if (filters.priceFilter) {
     if (filters.priceFilter === 'free') {
-      filtered = filtered.filter(prompt => prompt.isFree)
+      results = results.filter(prompt => prompt.isFree)
     } else if (filters.priceFilter === 'paid') {
-      filtered = filtered.filter(prompt => !prompt.isFree)
+      results = results.filter(prompt => !prompt.isFree)
     }
   }
 
-  // Filter by tags
+  // Tags filter
   if (filters.tags && filters.tags.length > 0) {
-    filtered = filtered.filter(prompt =>
+    results = results.filter(prompt =>
       filters.tags!.some(tag => prompt.tags.includes(tag))
     )
   }
 
-  // Sort results
+  // Sort
   if (filters.sortBy) {
     switch (filters.sortBy) {
       case 'newest':
-        filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         break
       case 'oldest':
-        filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-        break
-      case 'rating':
-        filtered.sort((a, b) => b.rating - a.rating)
-        break
-      case 'downloads':
-        filtered.sort((a, b) => b.downloads - a.downloads)
-        break
-      case 'views':
-        filtered.sort((a, b) => b.views - a.views)
+        results.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
         break
       case 'price-low':
-        filtered.sort((a, b) => a.price - b.price)
+        results.sort((a, b) => a.price - b.price)
         break
       case 'price-high':
-        filtered.sort((a, b) => b.price - a.price)
+        results.sort((a, b) => b.price - a.price)
         break
+      case 'rating':
+        results.sort((a, b) => b.rating - a.rating)
+        break
+      case 'downloads':
+        results.sort((a, b) => b.downloads - a.downloads)
+        break
+      case 'views':
+        results.sort((a, b) => b.views - a.views)
+        break
+      default:
+        results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     }
   }
 
-  return filtered
+  return results
 }
 
-export function addPrompt(prompt: Omit<Prompt, 'id' | 'createdAt' | 'views' | 'downloads'>): Prompt {
-  const newPrompt: Prompt = {
-    ...prompt,
-    id: Date.now().toString(),
-    createdAt: new Date(),
-    views: 0,
-    downloads: 0
-  }
+// Get prompts by category
+export const getPromptsByCategory = (category: string): Prompt[] => {
+  return searchPrompts('', { category })
+}
+
+// Increment views
+export const incrementViews = (id: string): void => {
+  const prompts = getAllPrompts()
+  const index = prompts.findIndex(p => p.id === id)
   
-  prompts.push(newPrompt)
-  return newPrompt
+  if (index !== -1) {
+    prompts[index].views += 1
+    savePrompts(prompts)
+  }
+}
+
+// Increment downloads
+export const incrementDownloads = (id: string): void => {
+  const prompts = getAllPrompts()
+  const index = prompts.findIndex(p => p.id === id)
+  
+  if (index !== -1) {
+    prompts[index].downloads += 1
+    savePrompts(prompts)
+  }
 }
