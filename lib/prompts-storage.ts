@@ -222,3 +222,25 @@ export const incrementDownloads = (id: string): void => {
     savePrompts(prompts)
   }
 }
+
+export const addPrompt = (prompt: Omit<Prompt, "id">): Prompt => {
+  const prompts = getAllPrompts()
+  const newPrompt: Prompt = {
+    ...prompt,
+    id: Date.now().toString(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }
+
+  const updatedPrompts = [newPrompt, ...prompts]
+  savePrompts(updatedPrompts)
+  return newPrompt
+}
+
+export const getFeaturedPrompts = (): Prompt[] => {
+  const prompts = getAllPrompts()
+  return prompts
+    .filter(prompt => prompt.featured)
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 6)
+}
