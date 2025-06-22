@@ -1,4 +1,3 @@
-
 -- Criar tabela de usuários
 CREATE TABLE IF NOT EXISTS users (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -22,32 +21,73 @@ CREATE TABLE IF NOT EXISTS categories (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Criar tabela de prompts
+-- Criando a estrutura do banco de dados
 CREATE TABLE IF NOT EXISTS prompts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  title TEXT NOT NULL,
-  description TEXT NOT NULL,
-  content TEXT NOT NULL,
-  category TEXT NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  content TEXT,
+  prompt TEXT,
+  category VARCHAR(100),
+  tags TEXT[],
   price DECIMAL(10,2) DEFAULT 0,
-  is_paid BOOLEAN DEFAULT FALSE,
-  is_free BOOLEAN DEFAULT TRUE,
-  is_admin_created BOOLEAN DEFAULT FALSE,
-  featured BOOLEAN DEFAULT FALSE,
-  author_id TEXT NOT NULL,
-  author TEXT NOT NULL,
-  author_avatar TEXT DEFAULT '/placeholder-user.jpg',
-  thumbnail TEXT NOT NULL,
-  images TEXT[] DEFAULT '{}',
-  video_preview TEXT,
-  tags TEXT[] DEFAULT '{}',
-  rating DECIMAL(3,2) DEFAULT 0,
-  downloads INTEGER DEFAULT 0,
+  is_free BOOLEAN DEFAULT false,
+  ai_tool VARCHAR(100),
+  author_name VARCHAR(255),
+  author_id VARCHAR(255),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   views INTEGER DEFAULT 0,
-  slug TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(category, slug)
+  downloads INTEGER DEFAULT 0,
+  rating DECIMAL(3,2) DEFAULT 0,
+  review_count INTEGER DEFAULT 0,
+  featured BOOLEAN DEFAULT false,
+  verified BOOLEAN DEFAULT false,
+  slug VARCHAR(255),
+  preview_images TEXT[],
+  images TEXT[],
+  difficulty VARCHAR(50) DEFAULT 'beginner',
+  license VARCHAR(50) DEFAULT 'personal',
+  is_admin_created BOOLEAN DEFAULT false,
+  is_active BOOLEAN DEFAULT true,
+  video_url TEXT
+);
+
+-- Tabela de reviews
+CREATE TABLE IF NOT EXISTS reviews (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  prompt_id UUID REFERENCES prompts(id),
+  user_id VARCHAR(255) NOT NULL,
+  user_name VARCHAR(255) NOT NULL,
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+  comment TEXT,
+  is_verified_purchase BOOLEAN DEFAULT false,
+  helpful_votes INTEGER DEFAULT 0,
+  reported BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Tabela de FAQs
+CREATE TABLE IF NOT EXISTS faqs (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  question TEXT NOT NULL,
+  answer TEXT NOT NULL,
+  category VARCHAR(100),
+  order_num INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Tabela de compras (para verificação de reviews)
+CREATE TABLE IF NOT EXISTS purchases (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  prompt_id UUID REFERENCES prompts(id),
+  user_id VARCHAR(255) NOT NULL,
+  purchase_date TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  amount DECIMAL(10,2),
+  status VARCHAR(50) DEFAULT 'completed'
 );
 
 -- Criar tabela de tags
@@ -59,21 +99,6 @@ CREATE TABLE IF NOT EXISTS tags (
   is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(name, category)
-);
-
--- Criar tabela de reviews
-CREATE TABLE IF NOT EXISTS reviews (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  prompt_id UUID REFERENCES prompts(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  user_name TEXT NOT NULL,
-  user_avatar TEXT DEFAULT '/placeholder-user.jpg',
-  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
-  comment TEXT,
-  is_verified_purchase BOOLEAN DEFAULT FALSE,
-  helpful_votes INTEGER DEFAULT 0,
-  reported BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Criar tabela de blog posts
@@ -96,193 +121,63 @@ CREATE TABLE IF NOT EXISTS blog_posts (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Criar tabela de FAQs
-CREATE TABLE IF NOT EXISTS faqs (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  question TEXT NOT NULL,
-  answer TEXT NOT NULL,
-  category TEXT NOT NULL,
-  order_num INTEGER DEFAULT 0,
-  is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Inserir dados fictícios (usar DO block para evitar conflitos)
-DO $$
+-- Função para incrementar views
+CREATE OR REPLACE FUNCTION increment_views(prompt_id UUID)
+RETURNS void AS $$
 BEGIN
-  -- Categorias
-  IF NOT EXISTS (SELECT 1 FROM categories WHERE slug = 'midjourney') THEN
-    INSERT INTO categories (name, slug, icon, description, count) VALUES
-    ('Midjourney', 'midjourney', '🎨', 'Prompts para geração de imagens com Midjourney', 25);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM categories WHERE slug = 'dalle') THEN
-    INSERT INTO categories (name, slug, icon, description, count) VALUES
-    ('DALL-E', 'dalle', '🖼️', 'Prompts para criação de imagens com DALL-E', 18);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM categories WHERE slug = 'stable-diffusion') THEN
-    INSERT INTO categories (name, slug, icon, description, count) VALUES
-    ('Stable Diffusion', 'stable-diffusion', '⚡', 'Prompts para Stable Diffusion e derivados', 32);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM categories WHERE slug = 'chatgpt') THEN
-    INSERT INTO categories (name, slug, icon, description, count) VALUES
-    ('ChatGPT', 'chatgpt', '💬', 'Prompts para conversas e assistência com ChatGPT', 44);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM categories WHERE slug = 'leonardo-ai') THEN
-    INSERT INTO categories (name, slug, icon, description, count) VALUES
-    ('Leonardo AI', 'leonardo-ai', '🎭', 'Prompts para Leonardo AI e criação artística', 15);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM categories WHERE slug = 'photorealistic') THEN
-    INSERT INTO categories (name, slug, icon, description, count) VALUES
-    ('Photorealistic', 'photorealistic', '📸', 'Prompts para imagens fotorrealistas', 28);
-  END IF;
+  UPDATE prompts 
+  SET views = views + 1, updated_at = now()
+  WHERE id = prompt_id;
+END;
+$$ LANGUAGE plpgsql;
 
-  -- Usuários de exemplo
-  IF NOT EXISTS (SELECT 1 FROM users WHERE email = 'admin@prompts.com') THEN
-    INSERT INTO users (name, email, password, is_admin) VALUES
-    ('Admin User', 'admin@prompts.com', 'admin123', true);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM users WHERE email = 'maria@example.com') THEN
-    INSERT INTO users (name, email, password, is_admin) VALUES
-    ('Maria Silva', 'maria@example.com', '123456', false);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM users WHERE email = 'joao@example.com') THEN
-    INSERT INTO users (name, email, password, is_admin) VALUES
-    ('João Santos', 'joao@example.com', '123456', false);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM users WHERE email = 'ana@example.com') THEN
-    INSERT INTO users (name, email, password, is_admin) VALUES
-    ('Ana Costa', 'ana@example.com', '123456', false);
-  END IF;
+-- Função para incrementar downloads
+CREATE OR REPLACE FUNCTION increment_downloads(prompt_id UUID)
+RETURNS void AS $$
+BEGIN
+  UPDATE prompts 
+  SET downloads = downloads + 1, updated_at = now()
+  WHERE id = prompt_id;
+END;
+$$ LANGUAGE plpgsql;
 
-  -- Prompts de exemplo
-  IF NOT EXISTS (SELECT 1 FROM prompts WHERE slug = 'retrato-fotorrealista-profissional' AND category = 'midjourney') THEN
-    INSERT INTO prompts (title, description, content, category, price, is_paid, is_free, featured, author_id, author, thumbnail, images, tags, rating, downloads, views, slug) VALUES
-    ('Retrato Fotorrealista Profissional', 'Crie retratos incrivelmente realistas com detalhes profissionais', 'professional portrait of a [person], ultra realistic, detailed facial features, perfect lighting, 8k resolution, photographic quality', 'midjourney', 15.99, true, false, true, '1', 'Maria Silva', '/images/woman-portrait-preview.jpg', '{"/images/woman-portrait-preview.jpg"}', '{"retrato", "fotorrealista", "profissional"}', 4.8, 150, 1200, 'retrato-fotorrealista-profissional');
-  END IF;
+-- Inserir dados de exemplo apenas se não existirem
+INSERT INTO prompts (title, description, content, category, tags, price, is_free, ai_tool, author_name, featured, verified, slug, difficulty, license, is_admin_created)
+SELECT * FROM (VALUES
+  ('Retrato Profissional de Mulher', 'Prompt avançado para criar retratos profissionais femininos com iluminação cinematográfica', 'professional portrait of a woman, cinematic lighting, high quality, detailed', 'midjourney', ARRAY['retrato', 'profissional', 'mulher', 'fotografia'], 15.99, false, 'Midjourney', 'Ana Silva', true, true, 'retrato-profissional-mulher', 'intermediate', 'commercial', false),
+  ('Jaguar Místico', 'Crie imagens impressionantes de jaguares com elementos místicos e mágicos', 'mystical jaguar, magical elements, fantasy art style', 'dall-e', ARRAY['jaguar', 'místico', 'fantasia', 'animal'], 22.50, false, 'DALL-E', 'Carlos Santos', true, true, 'jaguar-mistico', 'advanced', 'commercial', false),
+  ('Mulher Super Saiyajin', 'Transforme personagens em poderosas guerreiras do estilo Dragon Ball', 'super saiyan woman, dragon ball style, powerful aura', 'stable-diffusion', ARRAY['anime', 'super saiyajin', 'dragon ball', 'mulher'], 18.00, false, 'Stable Diffusion', 'Maria Costa', true, true, 'mulher-super-saiyajin', 'intermediate', 'personal', false),
+  ('Logo Minimalista Gratuito', 'Prompt gratuito para criar logos minimalistas e modernos', 'minimalist logo design, clean lines, modern typography', 'dall-e', ARRAY['logo', 'design', 'minimalista', 'gratuito'], 0, true, 'DALL-E', 'Admin RePrompt', false, true, 'logo-minimalista-gratuito', 'beginner', 'personal', true),
+  ('Paisagem Cyberpunk', 'Crie paisagens futurísticas com estética cyberpunk', 'cyberpunk cityscape, neon lights, futuristic architecture', 'midjourney', ARRAY['cyberpunk', 'futurista', 'cidade', 'neon'], 12.99, false, 'Midjourney', 'Tech Artist', false, false, 'paisagem-cyberpunk', 'intermediate', 'commercial', false)
+) AS v(title, description, content, category, tags, price, is_free, ai_tool, author_name, featured, verified, slug, difficulty, license, is_admin_created)
+WHERE NOT EXISTS (SELECT 1 FROM prompts WHERE slug = v.slug);
 
-  IF NOT EXISTS (SELECT 1 FROM prompts WHERE slug = 'paisagem-fantastica-epica' AND category = 'dalle') THEN
-    INSERT INTO prompts (title, description, content, category, price, is_paid, is_free, featured, author_id, author, thumbnail, images, tags, rating, downloads, views, slug) VALUES
-    ('Paisagem Fantástica Épica', 'Gere paisagens fantásticas de tirar o fôlego', 'epic fantasy landscape, mystical mountains, magical atmosphere, dramatic lighting, cinematic composition, highly detailed', 'dalle', 12.50, true, false, true, '2', 'João Santos', '/placeholder.jpg', '{"/placeholder.jpg"}', '{"paisagem", "fantasia", "épico"}', 4.6, 89, 856, 'paisagem-fantastica-epica');
-  END IF;
+-- Inserir FAQs de exemplo
+INSERT INTO faqs (question, answer, category, order_num)
+SELECT * FROM (VALUES
+  ('Como funciona o marketplace de prompts?', 'Nosso marketplace conecta criadores de prompts com usuários que precisam de prompts de qualidade. Você pode comprar, vender e descobrir prompts para diversas ferramentas de IA.', 'Geral', 1),
+  ('Como posso vender meus prompts?', 'Para vender prompts, você precisa criar uma conta, acessar o dashboard e clicar em "Adicionar Novo Prompt". Defina título, descrição, preço e faça upload das imagens.', 'Vendas', 2),
+  ('Quais formas de pagamento são aceitas?', 'Aceitamos cartão de crédito, débito, PIX, boleto bancário e PayPal. Todos os pagamentos são processados de forma segura.', 'Pagamentos', 3),
+  ('Posso solicitar reembolso?', 'Sim, oferecemos reembolso integral em até 7 dias após a compra se você não estiver satisfeito com o prompt.', 'Pagamentos', 4),
+  ('Como funciona o sistema de avaliações?', 'Apenas usuários que compraram o prompt podem avaliá-lo. As avaliações incluem nota de 1 a 5 estrelas e comentários.', 'Avaliações', 5)
+) AS v(question, answer, category, order_num)
+WHERE NOT EXISTS (SELECT 1 FROM faqs WHERE question = v.question);
 
-  IF NOT EXISTS (SELECT 1 FROM prompts WHERE slug = 'assistente-programacao-ia' AND category = 'chatgpt') THEN
-    INSERT INTO prompts (title, description, content, category, price, is_paid, is_free, featured, author_id, author, thumbnail, images, tags, rating, downloads, views, slug) VALUES
-    ('Assistente de Programação IA', 'Prompt para assistente especializado em programação', 'You are an expert programming assistant. Help with code review, debugging, and optimization. Provide clear explanations and best practices.', 'chatgpt', 0, false, true, true, '3', 'Ana Costa', '/placeholder.jpg', '{"/placeholder.jpg"}', '{"programação", "código", "assistente"}', 4.9, 245, 1580, 'assistente-programacao-ia');
-  END IF;
+-- Inserir algumas reviews de exemplo
+INSERT INTO reviews (prompt_id, user_id, user_name, rating, comment, is_verified_purchase)
+SELECT p.id, 'user1', 'João Silva', 5, 'Excelente prompt! Resultados incríveis.', true
+FROM prompts p WHERE p.slug = 'retrato-profissional-mulher'
+AND NOT EXISTS (SELECT 1 FROM reviews WHERE prompt_id = p.id AND user_id = 'user1');
 
-  IF NOT EXISTS (SELECT 1 FROM prompts WHERE slug = 'arte-digital-anime-kawaii' AND category = 'stable-diffusion') THEN
-    INSERT INTO prompts (title, description, content, category, price, is_paid, is_free, featured, author_id, author, thumbnail, images, tags, rating, downloads, views, slug) VALUES
-    ('Arte Digital Anime Kawaii', 'Crie personagens anime super fofinhos', 'kawaii anime character, big eyes, pastel colors, cute expression, digital art style, high quality illustration', 'stable-diffusion', 8.99, true, false, false, '1', 'Maria Silva', '/images/cat-bird-jar-preview.jpg', '{"/images/cat-bird-jar-preview.jpg"}', '{"anime", "kawaii", "personagem"}', 4.7, 178, 920, 'arte-digital-anime-kawaii');
-  END IF;
+INSERT INTO reviews (prompt_id, user_id, user_name, rating, comment, is_verified_purchase)
+SELECT p.id, 'user2', 'Maria Santos', 4, 'Muito bom, recomendo!', true
+FROM prompts p WHERE p.slug = 'jaguar-mistico'
+AND NOT EXISTS (SELECT 1 FROM reviews WHERE prompt_id = p.id AND user_id = 'user2');
 
-  IF NOT EXISTS (SELECT 1 FROM prompts WHERE slug = 'arquitetura-moderna-minimalista' AND category = 'leonardo-ai') THEN
-    INSERT INTO prompts (title, description, content, category, price, is_paid, is_free, featured, author_id, author, thumbnail, images, tags, rating, downloads, views, slug) VALUES
-    ('Arquitetura Moderna Minimalista', 'Designs arquitetônicos modernos e minimalistas', 'modern minimalist architecture, clean lines, glass and steel, geometric shapes, natural lighting, contemporary design', 'leonardo-ai', 18.50, true, false, true, '2', 'João Santos', '/placeholder.jpg', '{"/placeholder.jpg"}', '{"arquitetura", "moderno", "minimalista"}', 4.5, 67, 432, 'arquitetura-moderna-minimalista');
-  END IF;
-
-  IF NOT EXISTS (SELECT 1 FROM prompts WHERE slug = 'jaguar-selva-amazonica' AND category = 'photorealistic') THEN
-    INSERT INTO prompts (title, description, content, category, price, is_paid, is_free, featured, author_id, author, thumbnail, images, tags, rating, downloads, views, slug) VALUES
-    ('Jaguar na Selva Amazônica', 'Imagem realista de jaguar em seu habitat natural', 'majestic jaguar in amazon rainforest, photorealistic, detailed fur texture, natural habitat, cinematic lighting, wildlife photography style', 'photorealistic', 14.99, true, false, true, '3', 'Ana Costa', '/images/jaguar-prompt-result.png', '{"/images/jaguar-prompt-result.png"}', '{"jaguar", "selva", "realista"}', 4.8, 201, 1340, 'jaguar-selva-amazonica');
-  END IF;
-
-  -- Tags
-  IF NOT EXISTS (SELECT 1 FROM tags WHERE name = 'Retrato' AND category = 'midjourney') THEN
-    INSERT INTO tags (name, slug, category, is_active) VALUES
-    ('Retrato', 'retrato', 'midjourney', true);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM tags WHERE name = 'Fotorrealista' AND category = 'midjourney') THEN
-    INSERT INTO tags (name, slug, category, is_active) VALUES
-    ('Fotorrealista', 'fotorrealista', 'midjourney', true);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM tags WHERE name = 'Paisagem' AND category = 'dalle') THEN
-    INSERT INTO tags (name, slug, category, is_active) VALUES
-    ('Paisagem', 'paisagem', 'dalle', true);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM tags WHERE name = 'Fantasia' AND category = 'dalle') THEN
-    INSERT INTO tags (name, slug, category, is_active) VALUES
-    ('Fantasia', 'fantasia', 'dalle', true);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM tags WHERE name = 'Programação' AND category = 'chatgpt') THEN
-    INSERT INTO tags (name, slug, category, is_active) VALUES
-    ('Programação', 'programacao', 'chatgpt', true);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM tags WHERE name = 'Assistente' AND category = 'chatgpt') THEN
-    INSERT INTO tags (name, slug, category, is_active) VALUES
-    ('Assistente', 'assistente', 'chatgpt', true);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM tags WHERE name = 'Anime' AND category = 'stable-diffusion') THEN
-    INSERT INTO tags (name, slug, category, is_active) VALUES
-    ('Anime', 'anime', 'stable-diffusion', true);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM tags WHERE name = 'Kawaii' AND category = 'stable-diffusion') THEN
-    INSERT INTO tags (name, slug, category, is_active) VALUES
-    ('Kawaii', 'kawaii', 'stable-diffusion', true);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM tags WHERE name = 'Arquitetura' AND category = 'leonardo-ai') THEN
-    INSERT INTO tags (name, slug, category, is_active) VALUES
-    ('Arquitetura', 'arquitetura', 'leonardo-ai', true);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM tags WHERE name = 'Moderno' AND category = 'leonardo-ai') THEN
-    INSERT INTO tags (name, slug, category, is_active) VALUES
-    ('Moderno', 'moderno', 'leonardo-ai', true);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM tags WHERE name = 'Animais' AND category = 'photorealistic') THEN
-    INSERT INTO tags (name, slug, category, is_active) VALUES
-    ('Animais', 'animais', 'photorealistic', true);
-  END IF;
-  
-  IF NOT EXISTS (SELECT 1 FROM tags WHERE name = 'Natureza' AND category = 'photorealistic') THEN
-    INSERT INTO tags (name, slug, category, is_active) VALUES
-    ('Natureza', 'natureza', 'photorealistic', true);
-  END IF;
-END $$;
-
--- Criar índices para performance
+-- Criar índices para melhor performance
 CREATE INDEX IF NOT EXISTS idx_prompts_category ON prompts(category);
 CREATE INDEX IF NOT EXISTS idx_prompts_featured ON prompts(featured);
 CREATE INDEX IF NOT EXISTS idx_prompts_slug ON prompts(slug);
 CREATE INDEX IF NOT EXISTS idx_reviews_prompt_id ON reviews(prompt_id);
+CREATE INDEX IF NOT EXISTS idx_faqs_category ON faqs(category);
 CREATE INDEX IF NOT EXISTS idx_tags_category ON tags(category);
-
--- Função para incrementar visualizações
-CREATE OR REPLACE FUNCTION increment_views(prompt_id UUID)
-RETURNS void
-LANGUAGE plpgsql
-AS $$
-BEGIN
-  UPDATE prompts 
-  SET views = views + 1 
-  WHERE id = prompt_id;
-END;
-$$;
-
--- Função para incrementar downloads
-CREATE OR REPLACE FUNCTION increment_downloads(prompt_id UUID)
-RETURNS void
-LANGUAGE plpgsql
-AS $$
-BEGIN
-  UPDATE prompts 
-  SET downloads = downloads + 1 
-  WHERE id = prompt_id;
-END;
-$$;

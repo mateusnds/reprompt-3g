@@ -8,20 +8,61 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Search, HelpCircle, MessageCircle, Mail, Phone } from "lucide-react"
-import { getFAQs, getFAQsByCategory } from "@/lib/database"
-import type { DatabaseFAQ } from "@/lib/database"
+import { FAQSection } from "@/components/faq-section"
+import Header from "@/components/header"
+import Footer from "@/components/footer"
+
+interface FAQ {
+  id: string
+  question: string
+  answer: string
+  category: string
+}
+
+const mockFAQs: FAQ[] = [
+  {
+    id: "1",
+    question: "Como funciona o marketplace de prompts?",
+    answer: "Nosso marketplace conecta criadores de prompts com usuários que precisam de prompts de qualidade. Você pode comprar, vender e descobrir prompts para diversas ferramentas de IA como Midjourney, DALL-E, ChatGPT e muito mais.",
+    category: "Geral"
+  },
+  {
+    id: "2",
+    question: "Como posso vender meus prompts?",
+    answer: "Para vender prompts, você precisa criar uma conta, acessar o dashboard e clicar em 'Adicionar Novo Prompt'. Defina o título, descrição, preço e faça upload das imagens de exemplo. Nosso time revisará seu prompt antes da publicação.",
+    category: "Vendas"
+  },
+  {
+    id: "3",
+    question: "Quais formas de pagamento são aceitas?",
+    answer: "Aceitamos cartão de crédito, débito, PIX, boleto bancário e PayPal. Todos os pagamentos são processados de forma segura através de nossos parceiros certificados.",
+    category: "Pagamentos"
+  },
+  {
+    id: "4",
+    question: "Posso solicitar reembolso?",
+    answer: "Sim, oferecemos reembolso integral em até 7 dias após a compra se você não estiver satisfeito com o prompt. Basta entrar em contato com nosso suporte.",
+    category: "Pagamentos"
+  },
+  {
+    id: "5",
+    question: "Como funciona o sistema de avaliações?",
+    answer: "Apenas usuários que compraram o prompt podem avaliá-lo. As avaliações incluem nota de 1 a 5 estrelas e comentários. Isso ajuda outros usuários a tomar decisões informadas.",
+    category: "Avaliações"
+  },
+  {
+    id: "6",
+    question: "Que tipos de prompts posso encontrar?",
+    answer: "Temos prompts para Midjourney, DALL-E, Stable Diffusion, ChatGPT, Claude, Leonardo AI e muitas outras ferramentas. As categorias incluem arte, fotografia, design, texto, código e muito mais.",
+    category: "Prompts"
+  }
+]
 
 export default function FAQPage() {
-  const [faqs, setFaqs] = useState<DatabaseFAQ[]>([])
-  const [filteredFaqs, setFilteredFaqs] = useState<DatabaseFAQ[]>([])
+  const [faqs, setFaqs] = useState<FAQ[]>(mockFAQs)
+  const [filteredFaqs, setFilteredFaqs] = useState<FAQ[]>(mockFAQs)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("Todos")
-
-  useEffect(() => {
-    const allFaqs = getFAQs()
-    setFaqs(allFaqs)
-    setFilteredFaqs(allFaqs)
-  }, [])
 
   useEffect(() => {
     let filtered = faqs
@@ -47,6 +88,8 @@ export default function FAQPage() {
 
   return (
     <div className="min-h-screen bg-black">
+      <Header />
+      
       <div className="container mx-auto px-4 py-12">
         {/* Header */}
         <div className="text-center mb-12">
@@ -209,7 +252,14 @@ export default function FAQPage() {
             </Card>
           </div>
         </div>
+
+        {/* Adicionar o componente FAQ original */}
+        <div className="mt-16">
+          <FAQSection />
+        </div>
       </div>
+
+      <Footer />
     </div>
   )
 }

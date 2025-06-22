@@ -1,9 +1,9 @@
+
 import { Metadata } from "next"
 import HeroSection from '@/components/hero-section'
 import FeaturedPrompts from '@/components/featured-prompts'
 import { TrustSignals } from '@/components/trust-signals'
 import { ReviewsSection } from '@/components/reviews-section'
-import { FAQSection } from '@/components/faq-section'
 import Footer from '@/components/footer'
 import Header from '@/components/header'
 import StructuredData from '@/components/structured-data'
@@ -23,8 +23,7 @@ export default function HomePage() {
           <HeroSection />
           <FeaturedPrompts />
           <TrustSignals />
-          <ReviewsSection />
-          <FAQSection />
+          <ReviewsSection promptId="homepage" promptTitle="RePrompt Platform" />
         </main>
         <Footer />
       </div>
