@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -8,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Star, Download, Eye } from "lucide-react"
 import Link from "next/link"
-import { searchPrompts } from "@/lib/prompts-storage"
+import { universalSearch } from "@/lib/prompts-storage"
 import type { Prompt } from "@/lib/types"
 import { VideoPreview } from "@/components/video-preview"
 import { use } from "react"
@@ -46,7 +45,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     const loadCategoryPrompts = () => {
       setLoading(true)
       try {
-        const results = searchPrompts("", {
+        const results = universalSearch({
           category: resolvedParams.categoria,
           priceFilter: priceFilter === "all" ? undefined : priceFilter,
           sortBy,

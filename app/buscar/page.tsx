@@ -74,11 +74,7 @@ export default function BuscarPage() {
             Início
           </Link>
           <span>/</span>
-          <Link href="/explorar" className="hover:text-white">
-            Explorar
-          </Link>
-          <span>/</span>
-          <span className="text-white">Busca</span>
+          <span className="text-white">Buscar</span>
         </nav>
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-4">

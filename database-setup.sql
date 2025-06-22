@@ -37,7 +37,6 @@ CREATE TABLE tags (
   name VARCHAR(100) NOT NULL,
   slug VARCHAR(100) UNIQUE NOT NULL,
   category VARCHAR(100),
-  is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
@@ -129,7 +128,6 @@ CREATE TABLE faqs (
   answer TEXT NOT NULL,
   category VARCHAR(100),
   order_num INTEGER DEFAULT 0,
-  is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 

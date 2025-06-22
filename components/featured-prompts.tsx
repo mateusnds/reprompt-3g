@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Star, Download, Eye, ShoppingCart, Zap } from "lucide-react"
+import { Star, Download, Eye, ShoppingCart, Zap, Clock } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { getFeaturedPromptsData, type Prompt } from '@/lib/prompts-storage'
+import { getFeaturedPrompts } from '@/lib/prompts-storage'
 
 export default function FeaturedPrompts() {
   const [prompts, setPrompts] = useState<Prompt[]>([])
@@ -16,7 +16,7 @@ export default function FeaturedPrompts() {
   useEffect(() => {
     const loadPrompts = async () => {
       try {
-        const data = await getFeaturedPromptsData()
+        const data = await getFeaturedPrompts()
         setPrompts(data)
       } catch (error) {
         console.error('Erro ao carregar prompts:', error)
@@ -183,10 +183,45 @@ export default function FeaturedPrompts() {
             size="lg"
             className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8"
           >
-            <Link href="/explorar">
+            <Link href="/buscar">
               Ver Todos os Prompts
             </Link>
           </Button>
+        </div>
+
+        <div className="mt-12 text-center">
+          <p className="text-gray-300 mb-4">
+            Explore mais prompts e encontre exatamente o que você precisa.
+          </p>
+          <div className="flex justify-center gap-4">
+            <Link href="/buscar?sortBy=rating" key="mais-avaliados">
+              <Button 
+                variant="outline" 
+                className="border-purple-600 text-purple-400 hover:bg-purple-600 hover:text-white"
+              >
+                <Star className="w-4 h-4 mr-2" />
+                Mais Avaliados
+              </Button>
+            </Link>
+            <Link href="/buscar?sortBy=newest" key="novidades">
+              <Button 
+                variant="outline" 
+                className="border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white"
+              >
+                <Clock className="w-4 h-4 mr-2" />
+                Novidades
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-12 text-center">
+          <p className="text-gray-300 mb-4">
+            Está com pouco dinheiro?
+          </p>
+          <Link href="/buscar?priceFilter=free" className="text-purple-400 hover:text-purple-300 font-medium">
+            Ver todos os prompts gratuitos →
+          </Link>
         </div>
       </div>
     </section>
