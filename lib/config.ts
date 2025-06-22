@@ -1,12 +1,17 @@
+
 const config = {
-  supabase: {
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  database: {
+    maxPrompts: 1000,
+    cacheTTL: 300, // 5 minutos
   },
-  site: {
-    name: 'RePrompt',
-    description: 'Marketplace #1 de Prompts para IA',
-    url: 'https://reprompt.com.br'
+  ui: {
+    promptsPerPage: 12,
+    maxTagsDisplay: 5,
+  },
+  features: {
+    enableReviews: true,
+    enablePurchases: true,
+    enableAdmin: true,
   }
 }
 
@@ -14,5 +19,5 @@ export function getConfig() {
   return config
 }
 
-export { getConfig }
+export { getConfig as default }
 export default config
