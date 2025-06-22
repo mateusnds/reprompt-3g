@@ -1,23 +1,14 @@
 
 const config = {
-  database: {
-    maxPrompts: 1000,
-    cacheTTL: 300, // 5 minutos
+  supabase: {
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
   },
-  ui: {
-    promptsPerPage: 12,
-    maxTagsDisplay: 5,
-  },
-  features: {
-    enableReviews: true,
-    enablePurchases: true,
-    enableAdmin: true,
+  app: {
+    name: 'RePrompt',
+    description: 'Marketplace de prompts para IA',
+    url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   }
 }
 
-export function getConfig() {
-  return config
-}
-
-export { getConfig as default }
 export default config

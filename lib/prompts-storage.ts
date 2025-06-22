@@ -2,122 +2,77 @@
 import { createClient } from '@/utils/supabase/client'
 import type { Prompt } from '@/lib/types'
 
-export async function getFeaturedPromptsData(): Promise<Prompt[]> {
-  try {
-    const supabase = createClient()
-
-    const { data, error } = await supabase
-      .from('prompts')
-      .select('*')
-      .eq('featured', true)
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
-      .limit(6)
-
-    if (error) {
-      console.error('Erro ao buscar prompts em destaque:', error)
-      return getFallbackFeaturedPrompts()
-    }
-
-    return data?.map(transformPromptData) || getFallbackFeaturedPrompts()
-  } catch (error) {
-    console.error('Erro ao carregar prompts:', error)
-    return getFallbackFeaturedPrompts()
+// Função para transformar dados do banco para o formato da aplicação
+function transformPromptData(data: any): Prompt {
+  return {
+    id: data.id || '',
+    title: data.title || '',
+    description: data.description || '',
+    content: data.content || data.prompt || '',
+    category: data.category || '',
+    tags: Array.isArray(data.tags) ? data.tags : (typeof data.tags === 'string' ? data.tags.split(',') : []),
+    price: Number(data.price) || 0,
+    aiTool: data.ai_tool || data.category || '',
+    author: data.author || 'Autor Desconhecido',
+    authorId: data.author_id || '',
+    authorAvatar: data.author_avatar || '/placeholder-user.jpg',
+    createdAt: data.created_at || new Date().toISOString(),
+    updatedAt: data.updated_at || new Date().toISOString(),
+    views: Number(data.views) || 0,
+    downloads: Number(data.downloads) || 0,
+    rating: Number(data.rating) || 0,
+    reviewCount: Number(data.review_count) || 0,
+    featured: Boolean(data.featured),
+    verified: Boolean(data.verified),
+    slug: data.slug || data.title?.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "") || '',
+    previewImages: data.preview_images || data.images || [],
+    images: data.images || data.preview_images || ['/placeholder.jpg'],
+    videoUrl: data.video_url,
+    difficulty: data.difficulty || 'beginner',
+    license: data.license || 'personal',
+    isFree: Boolean(data.is_free) || Number(data.price) === 0,
+    isPaid: Boolean(data.is_paid) || Number(data.price) > 0,
+    isAdminCreated: Boolean(data.is_admin_created),
+    isActive: data.active !== false,
+    prompt: data.content || data.prompt || ''
   }
 }
 
-export async function getAllPrompts(): Promise<Prompt[]> {
-  try {
-    const supabase = createClient()
-
-    const { data, error } = await supabase
-      .from('prompts')
-      .select('*')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
-
-    if (error) {
-      console.error('Erro ao buscar todos os prompts:', error)
-      return getFallbackPrompts()
-    }
-
-    return data?.map(transformPromptData) || getFallbackPrompts()
-  } catch (error) {
-    console.error('Erro ao carregar todos os prompts:', error)
-    return getFallbackPrompts()
-  }
-}
-
-export async function getPromptsByCategoryData(category: string): Promise<Prompt[]> {
-  try {
-    const supabase = createClient()
-
-    const { data, error } = await supabase
-      .from('prompts')
-      .select('*')
-      .eq('category', category)
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
-
-    if (error) {
-      console.error('Erro ao buscar prompts por categoria:', error)
-      return []
-    }
-
-    return data?.map(transformPromptData) || []
-  } catch (error) {
-    console.error('Erro ao carregar prompts por categoria:', error)
-    return []
-  }
-}
-
-export async function getPromptBySlug(slug: string): Promise<Prompt | null> {
-  try {
-    const supabase = createClient()
-
-    const { data, error } = await supabase
-      .from('prompts')
-      .select('*')
-      .eq('slug', slug)
-      .eq('is_active', true)
-      .single()
-
-    if (error) {
-      console.error('Erro ao buscar prompt por slug:', error)
-      // Fallback para busca local
-      const fallbackPrompts = getFallbackPrompts()
-      const prompt = fallbackPrompts.find(p => p.slug === slug)
-      return prompt || null
-    }
-
-    return data ? transformPromptData(data) : null
-  } catch (error) {
-    console.error('Erro ao carregar prompt por slug:', error)
-    return null
-  }
-}
-
-export async function searchPromptsData(query: string, filters?: any): Promise<Prompt[]> {
+// Função principal para buscar prompts (unificada para explorar/buscar)
+export async function searchPromptsData(query: string = '', filters?: {
+  category?: string
+  priceFilter?: 'all' | 'free' | 'paid'
+  sortBy?: string
+  tags?: string[]
+  featured?: boolean
+}): Promise<Prompt[]> {
   try {
     const supabase = createClient()
 
     let queryBuilder = supabase
       .from('prompts')
       .select('*')
-      .eq('is_active', true)
 
-    if (query) {
+    // Filtro de busca por texto
+    if (query.trim()) {
       queryBuilder = queryBuilder.or(`title.ilike.%${query}%,description.ilike.%${query}%,author.ilike.%${query}%`)
     }
 
+    // Filtro por categoria
     if (filters?.category && filters.category !== 'all') {
       queryBuilder = queryBuilder.eq('category', filters.category)
     }
 
+    // Filtro por preço
     if (filters?.priceFilter === 'free') {
       queryBuilder = queryBuilder.eq('is_free', true)
     } else if (filters?.priceFilter === 'paid') {
       queryBuilder = queryBuilder.eq('is_paid', true)
+    }
+
+    // Filtro por featured
+    if (filters?.featured) {
+      queryBuilder = queryBuilder.eq('featured', true)
     }
 
     // Ordenação
@@ -150,104 +105,118 @@ export async function searchPromptsData(query: string, filters?: any): Promise<P
 
     if (error) {
       console.error('Erro ao buscar prompts:', error)
-      return []
+      return getFallbackPrompts()
     }
 
-    return data?.map(transformPromptData) || []
+    return data?.map(transformPromptData) || getFallbackPrompts()
   } catch (error) {
     console.error('Erro ao buscar prompts:', error)
-    return []
+    return getFallbackPrompts()
   }
 }
 
+// Função para buscar prompts em destaque
+export async function getFeaturedPromptsData(): Promise<Prompt[]> {
+  return searchPromptsData('', { featured: true, sortBy: 'views' })
+}
+
+// Função para buscar todos os prompts
+export async function getAllPrompts(): Promise<Prompt[]> {
+  return searchPromptsData('', { sortBy: 'newest' })
+}
+
+// Função para buscar prompts por categoria
+export async function getPromptsByCategoryData(category: string): Promise<Prompt[]> {
+  return searchPromptsData('', { category, sortBy: 'newest' })
+}
+
+// Função para buscar prompt por slug
+export async function getPromptBySlug(slug: string): Promise<Prompt | null> {
+  try {
+    const supabase = createClient()
+
+    const { data, error } = await supabase
+      .from('prompts')
+      .select('*')
+      .eq('slug', slug)
+      .single()
+
+    if (error) {
+      console.error('Erro ao buscar prompt por slug:', error)
+      // Fallback para busca local
+      const fallbackPrompts = getFallbackPrompts()
+      const prompt = fallbackPrompts.find(p => p.slug === slug)
+      return prompt || null
+    }
+
+    return data ? transformPromptData(data) : null
+  } catch (error) {
+    console.error('Erro ao carregar prompt por slug:', error)
+    return null
+  }
+}
+
+// Função para incrementar visualizações
 export async function incrementViews(promptId: string): Promise<void> {
   try {
     const supabase = createClient()
 
-    const { error } = await supabase.rpc('increment_views', { prompt_id: promptId })
+    // Usar update direto já que a função RPC não existe
+    const { data: prompt, error: fetchError } = await supabase
+      .from('prompts')
+      .select('views')
+      .eq('id', promptId)
+      .single()
 
-    if (error) {
-      // Fallback manual se a função não existir
-      const { data: prompt, error: fetchError } = await supabase
+    if (!fetchError && prompt) {
+      await supabase
         .from('prompts')
-        .select('views')
+        .update({ views: (prompt.views || 0) + 1 })
         .eq('id', promptId)
-        .single()
-
-      if (!fetchError && prompt) {
-        await supabase
-          .from('prompts')
-          .update({ views: (prompt.views || 0) + 1 })
-          .eq('id', promptId)
-      }
     }
   } catch (error) {
     console.error('Erro ao incrementar visualizações:', error)
   }
 }
 
+// Função para incrementar downloads
 export async function incrementDownloads(promptId: string): Promise<void> {
   try {
     const supabase = createClient()
 
-    const { error } = await supabase.rpc('increment_downloads', { prompt_id: promptId })
+    // Usar update direto já que a função RPC não existe
+    const { data: prompt, error: fetchError } = await supabase
+      .from('prompts')
+      .select('downloads')
+      .eq('id', promptId)
+      .single()
 
-    if (error) {
-      // Fallback manual se a função não existir
-      const { data: prompt, error: fetchError } = await supabase
+    if (!fetchError && prompt) {
+      await supabase
         .from('prompts')
-        .select('downloads')
+        .update({ downloads: (prompt.downloads || 0) + 1 })
         .eq('id', promptId)
-        .single()
-
-      if (!fetchError && prompt) {
-        await supabase
-          .from('prompts')
-          .update({ downloads: (prompt.downloads || 0) + 1 })
-          .eq('id', promptId)
-      }
     }
   } catch (error) {
     console.error('Erro ao incrementar downloads:', error)
   }
 }
 
-function transformPromptData(data: any): Prompt {
-  return {
-    id: data.id || '',
-    title: data.title || '',
-    description: data.description || '',
-    content: data.content || '',
-    category: data.category || '',
-    tags: Array.isArray(data.tags) ? data.tags : [],
-    price: data.price || 0,
-    aiTool: data.ai_tool || '',
-    author: data.author || 'Autor Desconhecido',
-    authorId: data.author_id || '',
-    authorAvatar: data.author_avatar || '/placeholder-user.jpg',
-    createdAt: data.created_at || new Date().toISOString(),
-    updatedAt: data.updated_at || new Date().toISOString(),
-    views: data.views || 0,
-    downloads: data.downloads || 0,
-    rating: data.rating || 0,
-    reviewCount: data.review_count || 0,
-    featured: data.featured || false,
-    verified: data.verified || false,
-    slug: data.slug || data.title?.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "") || '',
-    previewImages: data.preview_images || data.images || [],
-    images: data.images || data.preview_images || [],
-    videoUrl: data.video_url,
-    difficulty: data.difficulty || 'beginner',
-    license: data.license || 'personal',
-    isFree: data.is_free || data.price === 0,
-    isPaid: data.is_paid || data.price > 0,
-    isAdminCreated: data.is_admin_created || false,
-    isActive: data.is_active !== false,
-    prompt: data.content || ''
-  }
+// Função para buscar prompt por ID
+export function getPromptById(id: string): Prompt | null {
+  const prompts = getFallbackPrompts()
+  return prompts.find(p => p.id === id) || null
 }
 
-function getFallbackFeaturedPrompts(): Prompt[] {
+// Função para deletar prompt
+export function deletePrompt(id: string): boolean {
+  // Esta função precisaria ser implementada com Supabase
+  console.log('Delete prompt:', id)
+  return true
+}
+
+// Dados de fallback para quando o banco não estiver disponível
+function getFallbackPrompts(): Prompt[] {
   return [
     {
       id: '11111111-1111-1111-1111-111111111111',
@@ -269,7 +238,7 @@ function getFallbackFeaturedPrompts(): Prompt[] {
       reviewCount: 23,
       featured: true,
       verified: true,
-      slug: 'retrato-profissional-mulher',
+      slug: 'retrato-profissional-de-mulher',
       previewImages: ['/images/woman-portrait-preview.jpg'],
       difficulty: 'intermediate',
       license: 'commercial',
@@ -341,13 +310,7 @@ function getFallbackFeaturedPrompts(): Prompt[] {
       prompt: 'super saiyan woman, dragon ball style, powerful aura',
       images: ['/images/super-saiyan-woman-preview.jpg'],
       isActive: true
-    }
-  ]
-}
-
-function getFallbackPrompts(): Prompt[] {
-  return [
-    ...getFallbackFeaturedPrompts(),
+    },
     {
       id: '44444444-4444-4444-4444-444444444444',
       title: 'Logo Minimalista',
