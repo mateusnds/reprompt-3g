@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -9,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Search, Star, Download, Eye, Filter, X, Grid, List } from "lucide-react"
 import Link from "next/link"
-import { getAllPrompts } from "@/lib/prompts-storage"
+import { universalSearch, type UniversalSearchFilters } from "@/lib/prompts-storage"
 import { getActiveTags } from "@/lib/tags-storage"
 import type { Prompt } from "@/lib/types"
 import type { Tag } from "@/lib/tags-storage"
@@ -33,7 +34,6 @@ const categories = [
 
 export default function ExplorarPage() {
   const [prompts, setPrompts] = useState<Prompt[]>([])
-  const [filteredPrompts, setFilteredPrompts] = useState<Prompt[]>([])
   const [availableTags, setAvailableTags] = useState<Tag[]>([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
@@ -60,15 +60,16 @@ export default function ExplorarPage() {
 
   useEffect(() => {
     applyFilters()
-  }, [prompts, searchQuery, selectedCategory, selectedTags, priceFilter, sortBy])
+  }, [searchQuery, selectedCategory, selectedTags, priceFilter, sortBy])
 
-  const loadData = () => {
+  const loadData = async () => {
     setLoading(true)
     try {
-      const allPrompts = getAllPrompts()
-      const tags = getActiveTags()
+      const [allPrompts, tags] = await Promise.all([
+        universalSearch(),
+        getActiveTags()
+      ])
 
-      setPrompts(allPrompts)
       setAvailableTags(tags)
 
       // Calcular estatísticas
@@ -91,63 +92,22 @@ export default function ExplorarPage() {
     }
   }
 
-  const applyFilters = () => {
-    let filtered = [...prompts]
-
-    // Filtro de busca
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim()
-      filtered = filtered.filter(
-        (prompt) =>
-          prompt.title.toLowerCase().includes(query) ||
-          prompt.description.toLowerCase().includes(query) ||
-          prompt.category.toLowerCase().includes(query) ||
-          prompt.author.toLowerCase().includes(query) ||
-          prompt.tags.some((tag) => tag.toLowerCase().includes(query)),
-      )
+  const applyFilters = async () => {
+    const filters: UniversalSearchFilters = {
+      query: searchQuery.trim() || undefined,
+      category: selectedCategory !== "all" ? selectedCategory : undefined,
+      tags: selectedTags.length > 0 ? selectedTags : undefined,
+      priceFilter: priceFilter as 'all' | 'free' | 'paid',
+      sortBy: sortBy as any
     }
 
-    // Filtro de categoria
-    if (selectedCategory !== "all") {
-      filtered = filtered.filter((prompt) => prompt.category === selectedCategory)
+    try {
+      const filtered = await universalSearch(filters)
+      setPrompts(filtered)
+    } catch (error) {
+      console.error("Erro ao aplicar filtros:", error)
+      setPrompts([])
     }
-
-    // Filtro de tags
-    if (selectedTags.length > 0) {
-      filtered = filtered.filter((prompt) => selectedTags.some((tag) => prompt.tags.includes(tag)))
-    }
-
-    // Filtro de preço
-    if (priceFilter !== "all") {
-      if (priceFilter === "free") {
-        filtered = filtered.filter((prompt) => prompt.isFree)
-      } else if (priceFilter === "paid") {
-        filtered = filtered.filter((prompt) => !prompt.isFree)
-      }
-    }
-
-    // Ordenação
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "price-low":
-          return a.price - b.price
-        case "price-high":
-          return b.price - a.price
-        case "rating":
-          return b.rating - a.rating
-        case "downloads":
-          return b.downloads - a.downloads
-        case "views":
-          return b.views - a.views
-        case "oldest":
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        case "newest":
-        default:
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      }
-    })
-
-    setFilteredPrompts(filtered)
   }
 
   const handleTagToggle = (tagName: string) => {
@@ -207,7 +167,7 @@ export default function ExplorarPage() {
             </Card>
             <Card className="bg-gray-900 border-gray-700">
               <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-purple-400">{filteredPrompts.length}</div>
+                <div className="text-2xl font-bold text-purple-400">{prompts.length}</div>
                 <div className="text-gray-400 text-sm">Filtrados</div>
               </CardContent>
             </Card>
@@ -350,7 +310,7 @@ export default function ExplorarPage() {
                 {/* Ações dos filtros */}
                 <div className="flex justify-between items-center pt-4">
                   <div className="text-gray-400 text-sm">
-                    {filteredPrompts.length} de {stats.total} prompts
+                    {prompts.length} de {stats.total} prompts
                   </div>
                   {hasActiveFilters && (
                     <Button variant="ghost" onClick={clearFilters} className="text-gray-400 hover:text-white">
@@ -391,7 +351,7 @@ export default function ExplorarPage() {
         )}
 
         {/* Resultados */}
-        {filteredPrompts.length === 0 ? (
+        {prompts.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-400 text-lg mb-4">
               {hasActiveFilters ? "Nenhum prompt encontrado com os filtros aplicados" : "Nenhum prompt disponível"}
@@ -404,13 +364,10 @@ export default function ExplorarPage() {
           </div>
         ) : (
           <div className={viewMode === "grid" ? "grid md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
-            {filteredPrompts.map((prompt) => (
+            {prompts.map((prompt) => (
               <Link
                 key={prompt.id}
-                href={`/prompt/${prompt.category}/${prompt.title
-                  .toLowerCase()
-                  .replace(/\s+/g, "-")
-                  .replace(/[^\w-]/g, "")}`}
+                href={`/prompt/${prompt.category}/${prompt.slug}`}
               >
                 <Card
                   className={`hover:shadow-xl transition-shadow group bg-gray-800 border-gray-700 cursor-pointer ${
@@ -508,10 +465,10 @@ export default function ExplorarPage() {
         )}
 
         {/* Paginação (placeholder para implementação futura) */}
-        {filteredPrompts.length > 0 && (
+        {prompts.length > 0 && (
           <div className="mt-12 text-center">
             <p className="text-gray-400">
-              Mostrando {filteredPrompts.length} de {stats.total} prompts
+              Mostrando {prompts.length} de {stats.total} prompts
             </p>
           </div>
         )}

@@ -1,5 +1,3 @@
-
-```typescript
 import { createClient } from '@/utils/supabase/client'
 import type { Prompt } from '@/lib/types'
 
@@ -43,34 +41,34 @@ function transformPromptData(data: any): Prompt {
 export interface UniversalSearchFilters {
   // Texto de busca
   query?: string
-  
+
   // Filtros de categoria
   category?: string
   categories?: string[]
-  
+
   // Filtros de preço
   priceFilter?: 'all' | 'free' | 'paid'
   priceRange?: [number, number]
-  
+
   // Filtros de qualidade
   minRating?: number
   featured?: boolean
   verified?: boolean
-  
+
   // Filtros de popularidade
   minViews?: number
   minDownloads?: number
-  
+
   // Filtros de tags
   tags?: string[]
-  
+
   // Ordenação
   sortBy?: 'newest' | 'oldest' | 'rating' | 'downloads' | 'views' | 'price-low' | 'price-high' | 'popular' | 'trending'
-  
+
   // Paginação
   limit?: number
   offset?: number
-  
+
   // Filtros especiais
   authorId?: string
   isActive?: boolean
@@ -87,13 +85,13 @@ export async function universalSearch(filters: UniversalSearchFilters = {}): Pro
 
     // Filtro por status ativo (sempre aplicado por padrão)
     if (filters.isActive !== false) {
-      queryBuilder = queryBuilder.neq('is_active', false)
+      queryBuilder = queryBuilder.eq('is_active', true)
     }
 
     // Filtro de busca por texto
     if (filters.query?.trim()) {
       const searchQuery = filters.query.trim()
-      queryBuilder = queryBuilder.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,author.ilike.%${searchQuery}%,tags.cs.{${searchQuery}}`)
+      queryBuilder = queryBuilder.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,author.ilike.%${searchQuery}%`)
     }
 
     // Filtro por categoria única
@@ -120,7 +118,7 @@ export async function universalSearch(filters: UniversalSearchFilters = {}): Pro
         .lte('price', filters.priceRange[1])
     }
 
-    // Filtro por avaliação mínima
+    // Filtro por rating mínimo
     if (filters.minRating) {
       queryBuilder = queryBuilder.gte('rating', filters.minRating)
     }
@@ -135,7 +133,7 @@ export async function universalSearch(filters: UniversalSearchFilters = {}): Pro
       queryBuilder = queryBuilder.eq('verified', true)
     }
 
-    // Filtro por visualizações mínimas
+    // Filtro por views mínimas
     if (filters.minViews) {
       queryBuilder = queryBuilder.gte('views', filters.minViews)
     }
@@ -152,11 +150,8 @@ export async function universalSearch(filters: UniversalSearchFilters = {}): Pro
 
     // Ordenação
     switch (filters.sortBy) {
-      case 'price-low':
-        queryBuilder = queryBuilder.order('price', { ascending: true })
-        break
-      case 'price-high':
-        queryBuilder = queryBuilder.order('price', { ascending: false })
+      case 'oldest':
+        queryBuilder = queryBuilder.order('created_at', { ascending: true })
         break
       case 'rating':
         queryBuilder = queryBuilder.order('rating', { ascending: false })
@@ -167,14 +162,17 @@ export async function universalSearch(filters: UniversalSearchFilters = {}): Pro
       case 'views':
         queryBuilder = queryBuilder.order('views', { ascending: false })
         break
+      case 'price-low':
+        queryBuilder = queryBuilder.order('price', { ascending: true })
+        break
+      case 'price-high':
+        queryBuilder = queryBuilder.order('price', { ascending: false })
+        break
       case 'popular':
-        queryBuilder = queryBuilder.order('downloads', { ascending: false }).order('views', { ascending: false })
+        queryBuilder = queryBuilder.order('downloads', { ascending: false })
         break
       case 'trending':
-        queryBuilder = queryBuilder.order('views', { ascending: false }).order('rating', { ascending: false })
-        break
-      case 'oldest':
-        queryBuilder = queryBuilder.order('created_at', { ascending: true })
+        queryBuilder = queryBuilder.order('views', { ascending: false })
         break
       case 'newest':
       default:
@@ -183,213 +181,37 @@ export async function universalSearch(filters: UniversalSearchFilters = {}): Pro
     }
 
     // Paginação
-    const limit = filters.limit || 50
-    const offset = filters.offset || 0
-    
-    queryBuilder = queryBuilder.range(offset, offset + limit - 1)
+    if (filters.limit) {
+      queryBuilder = queryBuilder.limit(filters.limit)
+    }
+    if (filters.offset) {
+      queryBuilder = queryBuilder.range(filters.offset, filters.offset + (filters.limit || 10) - 1)
+    }
 
     const { data, error } = await queryBuilder
 
     if (error) {
-      console.error('Erro na busca unificada:', error)
-      return getFallbackPrompts(filters)
+      console.error('Erro ao buscar prompts:', error)
+      return getFallbackData(filters)
     }
 
-    return data?.map(transformPromptData) || getFallbackPrompts(filters)
+    return data ? data.map(transformPromptData) : getFallbackData(filters)
   } catch (error) {
-    console.error('Erro na busca unificada:', error)
-    return getFallbackPrompts(filters)
+    console.error('Erro ao buscar prompts:', error)
+    return getFallbackData(filters)
   }
 }
 
-// FUNÇÕES ESPECÍFICAS USANDO A BUSCA UNIFICADA
-
-// Buscar prompts em destaque
-export async function getFeaturedPromptsData(): Promise<Prompt[]> {
-  return universalSearch({ 
-    featured: true, 
-    sortBy: 'trending',
-    limit: 6
-  })
-}
-
-// Buscar prompts gratuitos
-export async function getFreePrompts(): Promise<Prompt[]> {
-  return universalSearch({ 
-    priceFilter: 'free', 
-    sortBy: 'popular',
-    limit: 20
-  })
-}
-
-// Buscar prompts mais avaliados
-export async function getTopRatedPrompts(): Promise<Prompt[]> {
-  return universalSearch({ 
-    minRating: 4, 
-    sortBy: 'rating',
-    limit: 20
-  })
-}
-
-// Buscar novidades (prompts recentes)
-export async function getNewPrompts(): Promise<Prompt[]> {
-  return universalSearch({ 
-    sortBy: 'newest',
-    limit: 20
-  })
-}
-
-// Buscar prompts populares
-export async function getPopularPrompts(): Promise<Prompt[]> {
-  return universalSearch({ 
-    minViews: 100, 
-    sortBy: 'popular',
-    limit: 20
-  })
-}
-
-// Buscar prompts por categoria
-export async function getPromptsByCategoryData(category: string): Promise<Prompt[]> {
-  return universalSearch({ 
-    category,
-    sortBy: 'newest'
-  })
-}
-
-// Buscar todos os prompts
-export async function getAllPrompts(): Promise<Prompt[]> {
-  return universalSearch({ 
-    sortBy: 'newest',
-    limit: 100
-  })
-}
-
-// Busca com texto (para página de busca)
-export async function searchPromptsData(query: string = '', filters?: {
-  category?: string
-  priceFilter?: 'all' | 'free' | 'paid'
-  sortBy?: string
-  tags?: string[]
-  featured?: boolean
-}): Promise<Prompt[]> {
-  return universalSearch({
-    query,
-    category: filters?.category,
-    priceFilter: filters?.priceFilter,
-    sortBy: filters?.sortBy as any,
-    tags: filters?.tags,
-    featured: filters?.featured
-  })
-}
-
-// Buscar prompt por slug
-export async function getPromptBySlug(slug: string): Promise<Prompt | null> {
-  try {
-    const supabase = createClient()
-
-    const { data, error } = await supabase
-      .from('prompts')
-      .select('*')
-      .eq('slug', slug)
-      .single()
-
-    if (error) {
-      console.error('Erro ao buscar prompt por slug:', error)
-      // Fallback para busca local
-      const fallbackPrompts = getFallbackPrompts()
-      const prompt = fallbackPrompts.find(p => p.slug === slug)
-      return prompt || null
-    }
-
-    return data ? transformPromptData(data) : null
-  } catch (error) {
-    console.error('Erro ao carregar prompt por slug:', error)
-    return null
-  }
-}
-
-// Buscar prompts por múltiplas categorias
-export async function getPromptsByCategories(categories: string[]): Promise<Prompt[]> {
-  return universalSearch({ 
-    categories,
-    sortBy: 'newest'
-  })
-}
-
-// Buscar prompts de um autor específico
-export async function getPromptsByAuthor(authorId: string): Promise<Prompt[]> {
-  return universalSearch({ 
-    authorId,
-    sortBy: 'newest'
-  })
-}
-
-// Função para incrementar visualizações
-export async function incrementViews(promptId: string): Promise<void> {
-  try {
-    const supabase = createClient()
-
-    const { data: prompt, error: fetchError } = await supabase
-      .from('prompts')
-      .select('views')
-      .eq('id', promptId)
-      .single()
-
-    if (!fetchError && prompt) {
-      await supabase
-        .from('prompts')
-        .update({ views: (prompt.views || 0) + 1 })
-        .eq('id', promptId)
-    }
-  } catch (error) {
-    console.error('Erro ao incrementar visualizações:', error)
-  }
-}
-
-// Função para incrementar downloads
-export async function incrementDownloads(promptId: string): Promise<void> {
-  try {
-    const supabase = createClient()
-
-    const { data: prompt, error: fetchError } = await supabase
-      .from('prompts')
-      .select('downloads')
-      .eq('id', promptId)
-      .single()
-
-    if (!fetchError && prompt) {
-      await supabase
-        .from('prompts')
-        .update({ downloads: (prompt.downloads || 0) + 1 })
-        .eq('id', promptId)
-    }
-  } catch (error) {
-    console.error('Erro ao incrementar downloads:', error)
-  }
-}
-
-// Função para buscar prompt por ID
-export function getPromptById(id: string): Prompt | null {
-  const prompts = getFallbackPrompts()
-  return prompts.find(p => p.id === id) || null
-}
-
-// Função para deletar prompt
-export function deletePrompt(id: string): boolean {
-  console.log('Delete prompt:', id)
-  return true
-}
-
-// Dados de fallback aplicando filtros básicos
-function getFallbackPrompts(filters?: UniversalSearchFilters): Prompt[] {
-  let prompts = [
+// Função de fallback que retorna dados locais
+function getFallbackData(filters: UniversalSearchFilters = {}): Prompt[] {
+  const fallbackPrompts: Prompt[] = [
     {
       id: '11111111-1111-1111-1111-111111111111',
-      title: 'Retrato Profissional de Mulher',
-      description: 'Prompt avançado para criar retratos profissionais femininos com iluminação cinematográfica',
-      content: 'professional portrait of a woman, cinematic lighting, high quality, detailed',
+      title: 'Retrato Feminino Artístico',
+      description: 'Prompt premium para criar retratos femininos com estilo artístico único',
+      content: 'artistic portrait of a woman, professional lighting, detailed features',
       category: 'midjourney',
-      tags: ['retrato', 'profissional', 'mulher', 'fotografia'],
+      tags: ['retrato', 'mulher', 'artístico', 'profissional'],
       price: 15.99,
       aiTool: 'Midjourney',
       author: 'Admin RePrompt',
@@ -397,27 +219,27 @@ function getFallbackPrompts(filters?: UniversalSearchFilters): Prompt[] {
       authorAvatar: '/placeholder-user.jpg',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      views: 1250,
-      downloads: 89,
+      views: 2500,
+      downloads: 420,
       rating: 4.8,
-      reviewCount: 23,
+      reviewCount: 89,
       featured: true,
       verified: true,
-      slug: 'retrato-profissional-de-mulher',
+      slug: 'retrato-feminino-artistico',
       previewImages: ['/images/woman-portrait-preview.jpg'],
       difficulty: 'intermediate',
       license: 'commercial',
       isFree: false,
       isPaid: true,
       isAdminCreated: true,
-      prompt: 'professional portrait of a woman, cinematic lighting, high quality, detailed',
+      prompt: 'artistic portrait of a woman, professional lighting, detailed features',
       images: ['/images/woman-portrait-preview.jpg'],
       isActive: true
     },
     {
       id: '22222222-2222-2222-2222-222222222222',
       title: 'Jaguar Místico',
-      description: 'Crie imagens impressionantes de jaguares com elementos místicos e mágicos',
+      description: 'Crie imagens de jaguares com elementos místicos e mágicos',
       content: 'mystical jaguar, magical elements, fantasy art style',
       category: 'dalle',
       tags: ['jaguar', 'místico', 'fantasia', 'animal'],
@@ -509,39 +331,106 @@ function getFallbackPrompts(filters?: UniversalSearchFilters): Prompt[] {
     }
   ]
 
-  // Aplicar filtros básicos no fallback
-  if (filters?.category && filters.category !== 'all') {
-    prompts = prompts.filter(p => p.category === filters.category)
-  }
+  // Aplicar filtros nos dados de fallback
+  let filtered = [...fallbackPrompts]
 
-  if (filters?.featured) {
-    prompts = prompts.filter(p => p.featured)
-  }
-
-  if (filters?.priceFilter === 'free') {
-    prompts = prompts.filter(p => p.isFree)
-  } else if (filters?.priceFilter === 'paid') {
-    prompts = prompts.filter(p => p.isPaid)
-  }
-
-  if (filters?.query) {
-    const query = filters.query.toLowerCase()
-    prompts = prompts.filter(p => 
-      p.title.toLowerCase().includes(query) ||
-      p.description.toLowerCase().includes(query) ||
-      p.author.toLowerCase().includes(query) ||
-      p.tags.some(tag => tag.toLowerCase().includes(query))
+  if (filters.query?.trim()) {
+    const query = filters.query.toLowerCase().trim()
+    filtered = filtered.filter(prompt =>
+      prompt.title.toLowerCase().includes(query) ||
+      prompt.description.toLowerCase().includes(query) ||
+      prompt.author.toLowerCase().includes(query) ||
+      prompt.tags.some(tag => tag.toLowerCase().includes(query))
     )
   }
 
-  return prompts
+  if (filters.category && filters.category !== 'all') {
+    filtered = filtered.filter(prompt => prompt.category === filters.category)
+  }
+
+  if (filters.priceFilter === 'free') {
+    filtered = filtered.filter(prompt => prompt.isFree)
+  } else if (filters.priceFilter === 'paid') {
+    filtered = filtered.filter(prompt => prompt.isPaid)
+  }
+
+  if (filters.featured) {
+    filtered = filtered.filter(prompt => prompt.featured)
+  }
+
+  if (filters.verified) {
+    filtered = filtered.filter(prompt => prompt.verified)
+  }
+
+  if (filters.tags && filters.tags.length > 0) {
+    filtered = filtered.filter(prompt =>
+      filters.tags!.some(tag => prompt.tags.includes(tag))
+    )
+  }
+
+  if (filters.authorId) {
+    filtered = filtered.filter(prompt => prompt.authorId === filters.authorId)
+  }
+
+  // Aplicar ordenação
+  switch (filters.sortBy) {
+    case 'oldest':
+      filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      break
+    case 'rating':
+      filtered.sort((a, b) => b.rating - a.rating)
+      break
+    case 'downloads':
+      filtered.sort((a, b) => b.downloads - a.downloads)
+      break
+    case 'views':
+      filtered.sort((a, b) => b.views - a.views)
+      break
+    case 'price-low':
+      filtered.sort((a, b) => a.price - b.price)
+      break
+    case 'price-high':
+      filtered.sort((a, b) => b.price - a.price)
+      break
+    case 'newest':
+    default:
+      filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      break
+  }
+
+  return filtered
 }
 
-// Aliases para compatibilidade com código existente
-export const getFeaturedPrompts = getFeaturedPromptsData
-export const getPromptsByCategory = getPromptsByCategoryData
-export const searchPrompts = searchPromptsData
+// Funções específicas para compatibilidade
+export async function getAllPrompts(): Promise<Prompt[]> {
+  return universalSearch()
+}
 
-// Exportar interface para compatibilidade
-export type { Prompt }
-```
+export async function getFeaturedPrompts(): Promise<Prompt[]> {
+  return universalSearch({ featured: true, limit: 6 })
+}
+
+export async function searchPrompts(query: string, category?: string, priceFilter?: string): Promise<Prompt[]> {
+  return universalSearch({
+    query,
+    category: category || 'all',
+    priceFilter: priceFilter as 'all' | 'free' | 'paid' || 'all'
+  })
+}
+
+export async function getPromptsByCategory(category: string): Promise<Prompt[]> {
+  return universalSearch({ category })
+}
+
+export function getPromptBySlug(slug: string): Prompt | null {
+  const fallbackPrompts = getFallbackData()
+  return fallbackPrompts.find(prompt => prompt.slug === slug) || null
+}
+
+export function incrementViews(promptId: string): void {
+  console.log('Incrementando views para prompt:', promptId)
+}
+
+export function incrementDownloads(promptId: string): void {
+  console.log('Incrementando downloads para prompt:', promptId)
+}
