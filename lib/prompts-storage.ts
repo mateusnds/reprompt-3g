@@ -1,4 +1,3 @@
-
 import { createClient } from '@/utils/supabase/client'
 
 export interface Prompt {
@@ -35,7 +34,7 @@ export interface Prompt {
 export async function getFeaturedPromptsData(): Promise<Prompt[]> {
   try {
     const supabase = createClient()
-    
+
     const { data, error } = await supabase
       .from('prompts')
       .select('*')
@@ -58,7 +57,7 @@ export async function getFeaturedPromptsData(): Promise<Prompt[]> {
 export async function getAllPrompts(): Promise<Prompt[]> {
   try {
     const supabase = createClient()
-    
+
     const { data, error } = await supabase
       .from('prompts')
       .select('*')
@@ -79,7 +78,7 @@ export async function getAllPrompts(): Promise<Prompt[]> {
 export async function getPromptsByCategoryData(category: string): Promise<Prompt[]> {
   try {
     const supabase = createClient()
-    
+
     const { data, error } = await supabase
       .from('prompts')
       .select('*')
@@ -115,7 +114,7 @@ export function getPromptBySlug(slug: string): Prompt | null {
 export async function searchPromptsData(query: string, filters?: any): Promise<Prompt[]> {
   try {
     const supabase = createClient()
-    
+
     let queryBuilder = supabase
       .from('prompts')
       .select('*')
@@ -151,7 +150,7 @@ export async function searchPromptsData(query: string, filters?: any): Promise<P
 export async function incrementViews(promptId: string): Promise<void> {
   try {
     const supabase = createClient()
-    
+
     // Como a função increment_views não existe, vamos usar uma abordagem alternativa
     const { data: prompt, error: fetchError } = await supabase
       .from('prompts')
@@ -180,7 +179,7 @@ export async function incrementViews(promptId: string): Promise<void> {
 export async function incrementDownloads(promptId: string): Promise<void> {
   try {
     const supabase = createClient()
-    
+
     // Como a função increment_downloads não existe, vamos usar uma abordagem alternativa
     const { data: prompt, error: fetchError } = await supabase
       .from('prompts')

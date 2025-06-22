@@ -1,12 +1,48 @@
 
 const { createClient } = require('@supabase/supabase-js')
 const fs = require('fs')
+const path = require('path')
+
+// Carregar variáveis de ambiente do .env.local
+function loadEnvFile() {
+  const envPath = path.join(process.cwd(), '.env.local')
+  
+  if (fs.existsSync(envPath)) {
+    const envContent = fs.readFileSync(envPath, 'utf8')
+    const envLines = envContent.split('\n')
+    
+    envLines.forEach(line => {
+      const trimmedLine = line.trim()
+      if (trimmedLine && !trimmedLine.startsWith('#')) {
+        const [key, ...valueParts] = trimmedLine.split('=')
+        if (key && valueParts.length > 0) {
+          const value = valueParts.join('=').trim()
+          process.env[key.trim()] = value
+        }
+      }
+    })
+    
+    console.log('Arquivo .env.local carregado com sucesso!')
+  } else {
+    console.error('Arquivo .env.local não encontrado!')
+    process.exit(1)
+  }
+}
+
+// Carregar variáveis de ambiente
+loadEnvFile()
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
+console.log('URL do Supabase:', supabaseUrl ? 'Carregada' : 'NÃO ENCONTRADA')
+console.log('Chave do Supabase:', supabaseKey ? 'Carregada' : 'NÃO ENCONTRADA')
+
 if (!supabaseUrl || !supabaseKey) {
   console.error('Erro: Variáveis de ambiente do Supabase não encontradas')
+  console.error('Verifique se o arquivo .env.local existe e contém:')
+  console.error('NEXT_PUBLIC_SUPABASE_URL=sua_url')
+  console.error('NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave')
   process.exit(1)
 }
 

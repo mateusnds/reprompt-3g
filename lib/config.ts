@@ -14,4 +14,5 @@ export function getConfig() {
   return config
 }
 
+export { getConfig }
 export default config

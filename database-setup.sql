@@ -76,8 +76,7 @@ CREATE TABLE IF NOT EXISTS faqs (
   category VARCHAR(100),
   order_num INTEGER DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 -- Tabela de compras (para verificação de reviews)
