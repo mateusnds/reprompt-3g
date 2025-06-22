@@ -1,4 +1,5 @@
 
+```typescript
 import { createClient } from '@/utils/supabase/client'
 import type { Prompt } from '@/lib/types'
 
@@ -33,19 +34,50 @@ function transformPromptData(data: any): Prompt {
     isFree: Boolean(data.is_free) || Number(data.price) === 0,
     isPaid: Boolean(data.is_paid) || Number(data.price) > 0,
     isAdminCreated: Boolean(data.is_admin_created),
-    isActive: data.active !== false,
+    isActive: data.is_active !== false,
     prompt: data.content || data.prompt || ''
   }
 }
 
-// Função principal para buscar prompts (unificada para explorar/buscar)
-export async function searchPromptsData(query: string = '', filters?: {
+// Interface para filtros de busca unificada
+export interface UniversalSearchFilters {
+  // Texto de busca
+  query?: string
+  
+  // Filtros de categoria
   category?: string
+  categories?: string[]
+  
+  // Filtros de preço
   priceFilter?: 'all' | 'free' | 'paid'
-  sortBy?: string
-  tags?: string[]
+  priceRange?: [number, number]
+  
+  // Filtros de qualidade
+  minRating?: number
   featured?: boolean
-}): Promise<Prompt[]> {
+  verified?: boolean
+  
+  // Filtros de popularidade
+  minViews?: number
+  minDownloads?: number
+  
+  // Filtros de tags
+  tags?: string[]
+  
+  // Ordenação
+  sortBy?: 'newest' | 'oldest' | 'rating' | 'downloads' | 'views' | 'price-low' | 'price-high' | 'popular' | 'trending'
+  
+  // Paginação
+  limit?: number
+  offset?: number
+  
+  // Filtros especiais
+  authorId?: string
+  isActive?: boolean
+}
+
+// FUNÇÃO DE BUSCA UNIFICADA PARA TODO O SITE
+export async function universalSearch(filters: UniversalSearchFilters = {}): Promise<Prompt[]> {
   try {
     const supabase = createClient()
 
@@ -53,30 +85,73 @@ export async function searchPromptsData(query: string = '', filters?: {
       .from('prompts')
       .select('*')
 
-    // Filtro de busca por texto
-    if (query.trim()) {
-      queryBuilder = queryBuilder.or(`title.ilike.%${query}%,description.ilike.%${query}%,author.ilike.%${query}%`)
+    // Filtro por status ativo (sempre aplicado por padrão)
+    if (filters.isActive !== false) {
+      queryBuilder = queryBuilder.neq('is_active', false)
     }
 
-    // Filtro por categoria
-    if (filters?.category && filters.category !== 'all') {
+    // Filtro de busca por texto
+    if (filters.query?.trim()) {
+      const searchQuery = filters.query.trim()
+      queryBuilder = queryBuilder.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,author.ilike.%${searchQuery}%,tags.cs.{${searchQuery}}`)
+    }
+
+    // Filtro por categoria única
+    if (filters.category && filters.category !== 'all') {
       queryBuilder = queryBuilder.eq('category', filters.category)
     }
 
+    // Filtro por múltiplas categorias
+    if (filters.categories && filters.categories.length > 0) {
+      queryBuilder = queryBuilder.in('category', filters.categories)
+    }
+
     // Filtro por preço
-    if (filters?.priceFilter === 'free') {
+    if (filters.priceFilter === 'free') {
       queryBuilder = queryBuilder.eq('is_free', true)
-    } else if (filters?.priceFilter === 'paid') {
+    } else if (filters.priceFilter === 'paid') {
       queryBuilder = queryBuilder.eq('is_paid', true)
     }
 
-    // Filtro por featured
-    if (filters?.featured) {
+    // Filtro por faixa de preço
+    if (filters.priceRange) {
+      queryBuilder = queryBuilder
+        .gte('price', filters.priceRange[0])
+        .lte('price', filters.priceRange[1])
+    }
+
+    // Filtro por avaliação mínima
+    if (filters.minRating) {
+      queryBuilder = queryBuilder.gte('rating', filters.minRating)
+    }
+
+    // Filtro por prompts em destaque
+    if (filters.featured) {
       queryBuilder = queryBuilder.eq('featured', true)
     }
 
+    // Filtro por prompts verificados
+    if (filters.verified) {
+      queryBuilder = queryBuilder.eq('verified', true)
+    }
+
+    // Filtro por visualizações mínimas
+    if (filters.minViews) {
+      queryBuilder = queryBuilder.gte('views', filters.minViews)
+    }
+
+    // Filtro por downloads mínimos
+    if (filters.minDownloads) {
+      queryBuilder = queryBuilder.gte('downloads', filters.minDownloads)
+    }
+
+    // Filtro por autor
+    if (filters.authorId) {
+      queryBuilder = queryBuilder.eq('author_id', filters.authorId)
+    }
+
     // Ordenação
-    switch (filters?.sortBy) {
+    switch (filters.sortBy) {
       case 'price-low':
         queryBuilder = queryBuilder.order('price', { ascending: true })
         break
@@ -92,6 +167,12 @@ export async function searchPromptsData(query: string = '', filters?: {
       case 'views':
         queryBuilder = queryBuilder.order('views', { ascending: false })
         break
+      case 'popular':
+        queryBuilder = queryBuilder.order('downloads', { ascending: false }).order('views', { ascending: false })
+        break
+      case 'trending':
+        queryBuilder = queryBuilder.order('views', { ascending: false }).order('rating', { ascending: false })
+        break
       case 'oldest':
         queryBuilder = queryBuilder.order('created_at', { ascending: true })
         break
@@ -101,36 +182,107 @@ export async function searchPromptsData(query: string = '', filters?: {
         break
     }
 
-    const { data, error } = await queryBuilder.limit(50)
+    // Paginação
+    const limit = filters.limit || 50
+    const offset = filters.offset || 0
+    
+    queryBuilder = queryBuilder.range(offset, offset + limit - 1)
+
+    const { data, error } = await queryBuilder
 
     if (error) {
-      console.error('Erro ao buscar prompts:', error)
-      return getFallbackPrompts()
+      console.error('Erro na busca unificada:', error)
+      return getFallbackPrompts(filters)
     }
 
-    return data?.map(transformPromptData) || getFallbackPrompts()
+    return data?.map(transformPromptData) || getFallbackPrompts(filters)
   } catch (error) {
-    console.error('Erro ao buscar prompts:', error)
-    return getFallbackPrompts()
+    console.error('Erro na busca unificada:', error)
+    return getFallbackPrompts(filters)
   }
 }
 
-// Função para buscar prompts em destaque
+// FUNÇÕES ESPECÍFICAS USANDO A BUSCA UNIFICADA
+
+// Buscar prompts em destaque
 export async function getFeaturedPromptsData(): Promise<Prompt[]> {
-  return searchPromptsData('', { featured: true, sortBy: 'views' })
+  return universalSearch({ 
+    featured: true, 
+    sortBy: 'trending',
+    limit: 6
+  })
 }
 
-// Função para buscar todos os prompts
-export async function getAllPrompts(): Promise<Prompt[]> {
-  return searchPromptsData('', { sortBy: 'newest' })
+// Buscar prompts gratuitos
+export async function getFreePrompts(): Promise<Prompt[]> {
+  return universalSearch({ 
+    priceFilter: 'free', 
+    sortBy: 'popular',
+    limit: 20
+  })
 }
 
-// Função para buscar prompts por categoria
+// Buscar prompts mais avaliados
+export async function getTopRatedPrompts(): Promise<Prompt[]> {
+  return universalSearch({ 
+    minRating: 4, 
+    sortBy: 'rating',
+    limit: 20
+  })
+}
+
+// Buscar novidades (prompts recentes)
+export async function getNewPrompts(): Promise<Prompt[]> {
+  return universalSearch({ 
+    sortBy: 'newest',
+    limit: 20
+  })
+}
+
+// Buscar prompts populares
+export async function getPopularPrompts(): Promise<Prompt[]> {
+  return universalSearch({ 
+    minViews: 100, 
+    sortBy: 'popular',
+    limit: 20
+  })
+}
+
+// Buscar prompts por categoria
 export async function getPromptsByCategoryData(category: string): Promise<Prompt[]> {
-  return searchPromptsData('', { category, sortBy: 'newest' })
+  return universalSearch({ 
+    category,
+    sortBy: 'newest'
+  })
 }
 
-// Função para buscar prompt por slug
+// Buscar todos os prompts
+export async function getAllPrompts(): Promise<Prompt[]> {
+  return universalSearch({ 
+    sortBy: 'newest',
+    limit: 100
+  })
+}
+
+// Busca com texto (para página de busca)
+export async function searchPromptsData(query: string = '', filters?: {
+  category?: string
+  priceFilter?: 'all' | 'free' | 'paid'
+  sortBy?: string
+  tags?: string[]
+  featured?: boolean
+}): Promise<Prompt[]> {
+  return universalSearch({
+    query,
+    category: filters?.category,
+    priceFilter: filters?.priceFilter,
+    sortBy: filters?.sortBy as any,
+    tags: filters?.tags,
+    featured: filters?.featured
+  })
+}
+
+// Buscar prompt por slug
 export async function getPromptBySlug(slug: string): Promise<Prompt | null> {
   try {
     const supabase = createClient()
@@ -156,12 +308,27 @@ export async function getPromptBySlug(slug: string): Promise<Prompt | null> {
   }
 }
 
+// Buscar prompts por múltiplas categorias
+export async function getPromptsByCategories(categories: string[]): Promise<Prompt[]> {
+  return universalSearch({ 
+    categories,
+    sortBy: 'newest'
+  })
+}
+
+// Buscar prompts de um autor específico
+export async function getPromptsByAuthor(authorId: string): Promise<Prompt[]> {
+  return universalSearch({ 
+    authorId,
+    sortBy: 'newest'
+  })
+}
+
 // Função para incrementar visualizações
 export async function incrementViews(promptId: string): Promise<void> {
   try {
     const supabase = createClient()
 
-    // Usar update direto já que a função RPC não existe
     const { data: prompt, error: fetchError } = await supabase
       .from('prompts')
       .select('views')
@@ -184,7 +351,6 @@ export async function incrementDownloads(promptId: string): Promise<void> {
   try {
     const supabase = createClient()
 
-    // Usar update direto já que a função RPC não existe
     const { data: prompt, error: fetchError } = await supabase
       .from('prompts')
       .select('downloads')
@@ -210,14 +376,13 @@ export function getPromptById(id: string): Prompt | null {
 
 // Função para deletar prompt
 export function deletePrompt(id: string): boolean {
-  // Esta função precisaria ser implementada com Supabase
   console.log('Delete prompt:', id)
   return true
 }
 
-// Dados de fallback para quando o banco não estiver disponível
-function getFallbackPrompts(): Prompt[] {
-  return [
+// Dados de fallback aplicando filtros básicos
+function getFallbackPrompts(filters?: UniversalSearchFilters): Prompt[] {
+  let prompts = [
     {
       id: '11111111-1111-1111-1111-111111111111',
       title: 'Retrato Profissional de Mulher',
@@ -343,12 +508,40 @@ function getFallbackPrompts(): Prompt[] {
       isActive: true
     }
   ]
+
+  // Aplicar filtros básicos no fallback
+  if (filters?.category && filters.category !== 'all') {
+    prompts = prompts.filter(p => p.category === filters.category)
+  }
+
+  if (filters?.featured) {
+    prompts = prompts.filter(p => p.featured)
+  }
+
+  if (filters?.priceFilter === 'free') {
+    prompts = prompts.filter(p => p.isFree)
+  } else if (filters?.priceFilter === 'paid') {
+    prompts = prompts.filter(p => p.isPaid)
+  }
+
+  if (filters?.query) {
+    const query = filters.query.toLowerCase()
+    prompts = prompts.filter(p => 
+      p.title.toLowerCase().includes(query) ||
+      p.description.toLowerCase().includes(query) ||
+      p.author.toLowerCase().includes(query) ||
+      p.tags.some(tag => tag.toLowerCase().includes(query))
+    )
+  }
+
+  return prompts
 }
 
-// Aliases para compatibilidade
+// Aliases para compatibilidade com código existente
 export const getFeaturedPrompts = getFeaturedPromptsData
 export const getPromptsByCategory = getPromptsByCategoryData
 export const searchPrompts = searchPromptsData
 
 // Exportar interface para compatibilidade
 export type { Prompt }
+```

@@ -154,7 +154,7 @@ INSERT INTO users (id, name, email, password, is_admin) VALUES
 -- Inserir prompts de exemplo
 INSERT INTO prompts (
   id, title, description, content, category, price, is_paid, is_free, 
-  is_admin_created, featured, author_id, author, slug, images, tags, rating, downloads, views
+  is_admin_created, featured, verified, active, author_id, author, slug, images, tags, rating, downloads, views
 ) VALUES
 (
   '11111111-1111-1111-1111-111111111111',
@@ -166,6 +166,8 @@ INSERT INTO prompts (
   true,
   false,
   true,
+  true,
+  false,
   true,
   '00000000-0000-0000-0000-000000000001',
   'Admin RePrompt',
@@ -187,6 +189,8 @@ INSERT INTO prompts (
   false,
   true,
   true,
+  false,
+  true,
   '00000000-0000-0000-0000-000000000001',
   'Admin RePrompt',
   'jaguar-mistico',
@@ -206,6 +210,8 @@ INSERT INTO prompts (
   true,
   false,
   true,
+  true,
+  false,
   true,
   '00000000-0000-0000-0000-000000000001',
   'Admin RePrompt',
@@ -227,6 +233,8 @@ INSERT INTO prompts (
   true,
   true,
   false,
+  false,
+  true,
   '00000000-0000-0000-0000-000000000001',
   'Admin RePrompt',
   'logo-minimalista',

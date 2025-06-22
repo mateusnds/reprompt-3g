@@ -24,14 +24,16 @@ export default function BuscarPage() {
   const [prompts, setPrompts] = useState<Prompt[]>([])
   const [loading, setLoading] = useState(false)
 
-  // Função para buscar prompts
-  const performSearch = () => {
+  // Função para buscar prompts usando busca unificada
+  const performSearch = async () => {
     setLoading(true)
     try {
-      const results = searchPrompts(searchQuery, {
+      const { universalSearch } = await import('@/lib/prompts-storage')
+      const results = await universalSearch({
+        query: searchQuery,
         category: category === "all" ? undefined : category,
-        priceFilter: priceFilter === "all" ? undefined : priceFilter,
-        sortBy,
+        priceFilter: priceFilter === "all" ? undefined : priceFilter as any,
+        sortBy: sortBy as any,
       })
       setPrompts(results)
     } catch (error) {
