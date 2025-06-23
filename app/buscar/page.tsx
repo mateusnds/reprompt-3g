@@ -1,4 +1,3 @@
-
 "use client"
 
 import type React from "react"
@@ -233,6 +232,15 @@ export default function BuscarPage() {
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+export default function BuscarPageWrapper() {
+  return (
+    <div className="min-h-screen bg-gray-900">
+      <Header />
+      <BuscarPage />
     </div>
   )
 }
