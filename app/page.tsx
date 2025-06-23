@@ -13,44 +13,7 @@ export const metadata: Metadata = {
 }
 
 // Assuming FeaturedPrompts component structure
-function FeaturedPromptsComponent() {
-  return (
-    <div>
-      <h2>Categorias Populares</h2>
-      <div>
-        <Link href="/buscar?category=midjourney">
-          <Button variant="outline" className="border-purple-600 text-purple-400 hover:bg-purple-600 hover:text-white transition-all">
-            <Sparkles className="w-4 h-4 mr-2" />
-            Midjourney
-          </Button>
-        </Link>
-        <Link href="/buscar?category=chatgpt">
-          <Button variant="outline" className="border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white transition-all">
-            <MessageSquare className="w-4 h-4 mr-2" />
-            ChatGPT
-          </Button>
-        </Link>
-        <Link href="/buscar?category=dalle">
-          <Button variant="outline" className="border-green-600 text-green-400 hover:bg-green-600 hover:text-white transition-all">
-            <Image className="w-4 h-4 mr-2" />
-            DALL-E
-          </Button>
-        </Link>
-        <Link href="/buscar?category=claude">
-          <Button variant="outline" className="border-yellow-600 text-yellow-400 hover:bg-yellow-600 hover:text-white transition-all">
-            <Brain className="w-4 h-4 mr-2" />
-            Claude
-          </Button>
-        </Link>
-      </div>
-    </div>
-  );
-}
 
-
-import { Button } from "@/components/ui/button"
-import { Brain, Image, MessageSquare, Sparkles } from "lucide-react"
-import Link from "next/link"
 
 export default function HomePage() {
   return (

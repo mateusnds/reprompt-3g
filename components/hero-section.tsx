@@ -19,10 +19,10 @@ export default function HeroSection() {
   }
 
   const popularCategories = [
-    { name: "Midjourney", count: "15,800+", href: "/prompts/midjourney" },
-    { name: "ChatGPT", count: "22,400+", href: "/prompts/chatgpt" },
-    { name: "DALL-E", count: "11,200+", href: "/prompts/dalle" },
-    { name: "Claude", count: "9,700+", href: "/prompts/claude" },
+    { name: "Midjourney", count: "15,800+", href: "/buscar?category=midjourney" },
+    { name: "ChatGPT", count: "22,400+", href: "/buscar?category=chatgpt" },
+    { name: "DALL-E", count: "11,200+", href: "/buscar?category=dalle" },
+    { name: "Claude", count: "9,700+", href: "/buscar?category=claude" },
   ]
 
   return (
