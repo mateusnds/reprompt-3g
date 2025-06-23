@@ -456,8 +456,11 @@ export const getBlogPosts = async (): Promise<DatabaseBlogPost[]> => {
       .eq('published', true)
       .order('created_at', { ascending: false })
 
-    if (error) throw error
-    return data || []
+    if (error) {
+      console.warn('Blog posts table not found or empty:', error)
+      return []
+    }
+    return Array.isArray(data) ? data : []
   } catch (error) {
     console.error('Erro ao carregar posts do blog:', error)
     return []

@@ -80,7 +80,7 @@ export default function FeaturedPrompts() {
             <Card key={prompt.id} className="group bg-gray-900/80 border-gray-700 hover:border-purple-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/10 overflow-hidden">
               <div className="relative overflow-hidden">
                 <Image
-                  src={prompt.previewImages[0] || '/placeholder.jpg'}
+                  src={prompt.previewImages?.[0] || prompt.images?.[0] || '/placeholder.jpg'}
                   alt={`Preview do prompt: ${prompt.title}`}
                   width={400}
                   height={200}
