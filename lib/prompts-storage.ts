@@ -126,15 +126,14 @@ export async function getPromptsByCategory(category: string): Promise<Prompt[]> 
 }
 
 // Buscar prompt específico
-export async function getPromptBySlug(category: string, slug: string): Promise<Prompt | null> {
+export async function getPromptBySlug(slug: string): Promise<Prompt | null> {
   const supabase = createClient()
 
   try {
     const { data, error } = await supabase
       .from('prompts')
       .select('*')
-      .eq('category', category)
-      .ilike('title', `%${slug.replace(/-/g, ' ')}%`)
+      .eq('slug', slug)
       .single()
 
     if (error || !data) {
@@ -179,6 +178,34 @@ export async function getMostDownloadedPrompts(): Promise<Prompt[]> {
     sortBy: 'downloads',
     limit: 20
   })
+}
+
+// Incrementar visualizações
+export async function incrementViews(promptId: string): Promise<void> {
+  const supabase = createClient()
+  
+  try {
+    await supabase
+      .from('prompts')
+      .update({ views: supabase.sql`views + 1` })
+      .eq('id', promptId)
+  } catch (error) {
+    console.error('Erro ao incrementar views:', error)
+  }
+}
+
+// Incrementar downloads
+export async function incrementDownloads(promptId: string): Promise<void> {
+  const supabase = createClient()
+  
+  try {
+    await supabase
+      .from('prompts')
+      .update({ downloads: supabase.sql`downloads + 1` })
+      .eq('id', promptId)
+  } catch (error) {
+    console.error('Erro ao incrementar downloads:', error)
+  }
 }
 
 // Alias para getFeaturedPrompts
