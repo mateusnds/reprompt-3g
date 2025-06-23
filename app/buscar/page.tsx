@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -78,7 +77,7 @@ export default function BuscarPage() {
         </nav>
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-4">
-            {searchQuery ? `Resultados para "${searchQuery}"` : "Explorar Prompts"}
+            {searchQuery ? `Resultados para "${searchQuery}"` : "Buscar Prompts"}
           </h1>
           <p className="text-gray-400">{loading ? "Buscando..." : `${prompts.length} prompts encontrados`}</p>
         </div>
@@ -96,132 +95,6 @@ export default function BuscarPage() {
                   className="pl-10 bg-gray-800 border-gray-700 text-white placeholder:text-gray-400"
                 />
               </div>
-
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                  <SelectValue placeholder="Categoria" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
-                  <SelectItem value="all">Todas</SelectItem>
-                  <SelectItem value="midjourney">Midjourney</SelectItem>
-                  <SelectItem value="chatgpt">ChatGPT</SelectItem>
-                  <SelectItem value="dalle">DALL-E</SelectItem>
-                  <SelectItem value="claude">Claude</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={priceFilter} onValueChange={setPriceFilter}>
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                  <SelectValue placeholder="Preço" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="free">Gratuitos</SelectItem>
-                  <SelectItem value="paid">Premium</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                  <SelectValue placeholder="Ordenar" />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
-                  <SelectItem value="newest">Mais Recentes</SelectItem>
-                  <SelectItem value="rating">Melhor Avaliados</SelectItem>
-                  <SelectItem value="downloads">Mais Baixados</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
-                <Search className="w-4 h-4 mr-2" />
-                Buscar
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Resultados */}
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="text-white">Carregando...</div>
-          </div>
-        ) : prompts.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400">Nenhum prompt encontrado</div>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {prompts.map((prompt) => (
-              <Card key={prompt.id} className="bg-gray-800 border-gray-700 hover:shadow-xl transition-shadow group">
-                <CardHeader className="p-0">
-                  <div className="relative overflow-hidden rounded-t-lg">
-                    <img
-                      src={prompt.images?.[0] || "/placeholder.jpg"}
-                      alt={prompt.title}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute top-3 left-3 flex gap-2">
-                      <Badge className="bg-gray-900/80 text-white text-xs">
-                        {prompt.category}
-                      </Badge>
-                      {prompt.isFree && (
-                        <Badge className="bg-green-600 text-white text-xs">Gratuito</Badge>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium text-white">{prompt.rating?.toFixed(1) || '0.0'}</span>
-                    </div>
-                    <div className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                      {prompt.isFree ? "Gratuito" : `R$ ${prompt.price?.toFixed(2).replace(".", ",") || '0,00'}`}
-                    </div>
-                  </div>
-
-                  <h3 className="font-bold text-lg mb-2 group-hover:text-purple-400 transition-colors text-white line-clamp-2">
-                    {prompt.title}
-                  </h3>
-
-                  <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-                    {prompt.description}
-                  </p>
-
-                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-1">
-                        <Download className="w-4 h-4" />
-                        <span>{prompt.downloads || 0}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Eye className="w-4 h-4" />
-                        <span>{prompt.views || 0}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-400">
-                      por <span className="font-medium text-gray-300">{prompt.author}</span>
-                    </div>
-                    <Link href={`/prompt/${prompt.category}/${prompt.slug}`}>
-                      <Button size="sm" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
-                        {prompt.isFree ? "Baixar" : "Comprar"}
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}/div>
 
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
@@ -262,6 +135,11 @@ export default function BuscarPage() {
                   <SelectItem value="price-high">Maior preço</SelectItem>
                 </SelectContent>
               </Select>
+
+              <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
+                <Search className="w-4 h-4 mr-2" />
+                Buscar
+              </Button>
             </form>
           </CardContent>
         </Card>
@@ -281,7 +159,7 @@ export default function BuscarPage() {
             {prompts.map((prompt) => (
               <Link
                 key={prompt.id}
-                href={`/prompt/${prompt.category}/${prompt.title
+                href={`/prompt/${prompt.category}/${prompt.slug || prompt.title
                   .toLowerCase()
                   .replace(/\s+/g, "-")
                   .replace(/[^\w-]/g, "")}`}
@@ -290,7 +168,7 @@ export default function BuscarPage() {
                   <CardHeader className="p-0">
                     <div className="relative overflow-hidden rounded-t-lg">
                       <img
-                        src={prompt.images[0] || "/placeholder.svg"}
+                        src={prompt.images?.[0] || "/placeholder.jpg"}
                         alt={prompt.title}
                         className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -310,10 +188,10 @@ export default function BuscarPage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-1">
                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-medium text-white">{prompt.rating.toFixed(1)}</span>
+                        <span className="text-sm font-medium text-white">{prompt.rating?.toFixed(1) || '0.0'}</span>
                       </div>
                       <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                        {prompt.isFree ? "Gratuito" : `R$ ${prompt.price.toFixed(2).replace(".", ",")}`}
+                        {prompt.isFree ? "Gratuito" : `R$ ${prompt.price?.toFixed(2).replace(".", ",") || '0,00'}`}
                       </div>
                     </div>
 
@@ -327,11 +205,11 @@ export default function BuscarPage() {
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-1">
                           <Download className="w-4 h-4" />
-                          <span>{prompt.downloads}</span>
+                          <span>{prompt.downloads || 0}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <Eye className="w-4 h-4" />
-                          <span>{prompt.views}</span>
+                          <span>{prompt.views || 0}</span>
                         </div>
                       </div>
                     </div>

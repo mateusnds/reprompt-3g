@@ -75,6 +75,9 @@ export default function HeroSection() {
               </Button>
             </div>
             <p id="search-help" className="text-sm text-gray-400 mt-2 text-center">
+              Busque por categoria, ferramenta de IA, estilo ou palavra-chave
+            </p>
+          </form>>
               Encontre prompts profissionais testados para suas necessidades específicas
             </p>
           </form>

@@ -39,7 +39,7 @@ export function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link href="/buscar" className="text-gray-400 hover:text-white transition-colors">
-                  Explorar Prompts
+                  Buscar Prompts
                 </Link>
               </li>
               <li>
