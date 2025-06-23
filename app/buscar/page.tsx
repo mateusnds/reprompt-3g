@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -12,7 +13,7 @@ import { Search, Star, Download, Eye } from "lucide-react"
 import Link from "next/link"
 import { searchPrompts } from "@/lib/prompts-storage"
 import type { Prompt } from "@/lib/types"
-import { Header } from "@/components/header"
+import Header from "@/components/header"
 
 export default function BuscarPage() {
   const searchParams = useSearchParams()

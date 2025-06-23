@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Button } from "@/components/ui/button"
@@ -47,8 +48,8 @@ export default function HeroSection() {
           </h1>
 
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              Descubra, compre e venda os melhores prompts para IA. Mais de <strong>50.000 criadores</strong> confiam na nossa plataforma.
-            </p>
+            Descubra, compre e venda os melhores prompts para IA. Mais de <strong>50.000 criadores</strong> confiam na nossa plataforma.
+          </p>
 
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="w-full max-w-2xl mx-auto mb-8" role="search">
@@ -76,9 +77,6 @@ export default function HeroSection() {
             </div>
             <p id="search-help" className="text-sm text-gray-400 mt-2 text-center">
               Busque por categoria, ferramenta de IA, estilo ou palavra-chave
-            </p>
-          </form>>
-              Encontre prompts profissionais testados para suas necessidades específicas
             </p>
           </form>
 
