@@ -12,9 +12,6 @@ export const metadata: Metadata = {
   description: "Descubra, compre e venda os melhores prompts para IA no maior marketplace do Brasil. Mais de 50.000 criadores confiam na nossa plataforma. Prompts para Midjourney, DALL-E, Stable Diffusion e ChatGPT.",
 }
 
-// Assuming FeaturedPrompts component structure
-
-
 export default function HomePage() {
   return (
     <>
@@ -23,7 +20,7 @@ export default function HomePage() {
         <Header />
         <main>
           <HeroSection />
-          <FeaturedPromptsComponent />
+          <FeaturedPrompts />
           <TrustSignals />
           <ReviewsSection promptId="homepage" promptTitle="RePrompt Platform" />
         </main>

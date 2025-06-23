@@ -1,4 +1,3 @@
-
 "use client"
 
 import { createClient } from '@/utils/supabase/client'
@@ -581,7 +580,7 @@ export const initializeDatabase = async (): Promise<void> => {
     const categories = await getCategories()
     if (categories.length === 0) {
       console.log('Seeding initial data...')
-      
+
       // Create initial categories
       const initialCategories = [
         {

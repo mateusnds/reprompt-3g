@@ -8,6 +8,7 @@ import { Star, Download, Eye, ShoppingCart, Zap, Clock } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { getFeaturedPrompts } from '@/lib/prompts-storage'
+import { Prompt } from '@/lib/types'
 
 export default function FeaturedPrompts() {
   const [prompts, setPrompts] = useState<Prompt[]>([])
