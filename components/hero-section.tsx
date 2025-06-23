@@ -42,13 +42,13 @@ export default function HeroSection() {
 
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
             Transforme suas
-            <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent"> ideias </span>
+            <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent"> ideias </span> 
             em realidade
           </h1>
 
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Descubra, compre e venda os melhores prompts para IA. Mais de <strong>50.000+ criadores</strong> confiam na nossa plataforma.
-          </p>
+          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+              Descubra, compre e venda os melhores prompts para IA. Mais de <strong>50.000 criadores</strong> confiam na nossa plataforma.
+            </p>
 
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="w-full max-w-2xl mx-auto mb-8" role="search">
