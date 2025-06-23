@@ -34,17 +34,14 @@ export default function HeroSection() {
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="container mx-auto px-4 relative">
-        <div className="text-center max-w-4xl mx-auto mb-12">
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <Sparkles className="w-8 h-8 text-purple-400" />
-            <span className="text-purple-400 font-semibold text-lg">Marketplace #1 de Prompts IA</span>
-          </div>
-
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-            Transforme suas
-            <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent"> ideias </span> 
-            em realidade
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="text-center max-w-4xl mx-auto">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            <span className="bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Marketplace de Prompts
+            </span>
+            <br />
+            <span className="text-white">para Inteligência Artificial</span>
           </h1>
 
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
@@ -54,23 +51,19 @@ export default function HeroSection() {
           {/* Search Bar */}
           <form onSubmit={handleSearch} className="w-full max-w-2xl mx-auto mb-8" role="search">
             <div className="relative">
-              <label htmlFor="main-search" className="sr-only">
-                Buscar prompts de IA por categoria, ferramenta ou estilo
-              </label>
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
-                id="main-search"
-                type="text"
-                placeholder="Ex: 'retrato fotorrealístico', 'ChatGPT marketing', 'Midjourney paisagem'..."
+                type="search"
+                placeholder="Busque por categoria, ferramenta de IA, estilo ou palavra-chave"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-14 pl-12 pr-32 text-lg bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-300 rounded-2xl focus:bg-white/20 transition-all"
-                autoComplete="off"
+                className="pl-12 pr-4 py-4 text-lg bg-white/10 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-purple-400/20"
                 aria-describedby="search-help"
               />
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-300" aria-hidden="true" />
-              <Button 
+              <Button
                 type="submit"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 h-10 rounded-xl transition-all duration-300"
+                size="lg"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
               >
                 Buscar
               </Button>
@@ -80,58 +73,82 @@ export default function HeroSection() {
             </p>
           </form>
 
-          {/* Quick Actions */}
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
-            <Link href="/buscar?priceFilter=free">
-              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 rounded-xl">
-                <Zap className="w-4 h-4 mr-2" />
-                Prompts Gratuitos
-              </Button>
-            </Link>
-            <Link href="/buscar?sortBy=rating">
-              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 rounded-xl">
-                <Star className="w-4 h-4 mr-2" />
-                Mais Avaliados
-              </Button>
-            </Link>
-            <Link href="/buscar?sortBy=newest">
-              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 rounded-xl">
-                <TrendingUp className="w-4 h-4 mr-2" />
-                Novidades
-              </Button>
-            </Link>
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-white mb-1">50K+</div>
+              <div className="text-gray-400 text-sm">Prompts</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-white mb-1">25K+</div>
+              <div className="text-gray-400 text-sm">Criadores</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-white mb-1">4.9</div>
+              <div className="text-gray-400 text-sm">Avaliação</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-white mb-1">100%</div>
+              <div className="text-gray-400 text-sm">Testados</div>
+            </div>
           </div>
-        </div>
 
-        {/* Popular Categories Grid */}
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-white text-center mb-8">Categorias Populares</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {popularCategories.map((category) => (
-              <Link
-                key={category.name}
-                href={category.href}
-                className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 transition-all duration-300"
+          {/* Popular Categories Grid */}
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold text-white text-center mb-8">Categorias Populares</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {popularCategories.map((category) => (
+                <Link
+                  key={category.name}
+                  href={category.href}
+                  className="group bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center hover:bg-white/10 transition-all duration-300"
+                >
+                  <h3 className="text-white font-semibold text-lg mb-2 group-hover:text-purple-300 transition-colors">
+                    {category.name}
+                  </h3>
+                  <p className="text-gray-400 text-sm">{category.count} prompts</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12">
+            <Link href="/buscar">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 text-lg"
               >
-                <h3 className="text-white font-semibold text-lg mb-2 group-hover:text-purple-300 transition-colors">
-                  {category.name}
-                </h3>
-                <p className="text-gray-400 text-sm">{category.count} prompts</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* CTA Section */}
-        <div className="text-center mt-16">
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 max-w-2xl mx-auto">
-            <h3 className="text-2xl font-bold text-white mb-4">Comece a vender seus prompts hoje</h3>
-            <p className="text-gray-300 mb-6">Junte-se a milhares de criadores que já monetizam sua criatividade.</p>
-            <Link href="/dashboard">
-              <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-8 py-3 rounded-xl">
-                Começar a Vender
+                <Search className="w-5 h-5 mr-2" />
+                Buscar Prompts
               </Button>
             </Link>
+            <Link href="/cadastrar-prompt">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white/20 text-white hover:bg-white/10 px-8 py-4 text-lg backdrop-blur-sm"
+              >
+                <Zap className="w-5 h-5 mr-2" />
+                Vender Prompts
+              </Button>
+            </Link>
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="flex flex-wrap justify-center items-center gap-8 mt-12 opacity-60">
+            <div className="flex items-center space-x-2">
+              <Star className="w-5 h-5 text-yellow-400" />
+              <span className="text-gray-300 text-sm">Prompts testados</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Sparkles className="w-5 h-5 text-blue-400" />
+              <span className="text-gray-300 text-sm">Resultados garantidos</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <TrendingUp className="w-5 h-5 text-green-400" />
+              <span className="text-gray-300 text-sm">Tendências atualizadas</span>
+            </div>
           </div>
         </div>
       </div>

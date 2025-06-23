@@ -236,11 +236,3 @@ export default function BuscarPage() {
   )
 }
 
-export default function BuscarPageWrapper() {
-  return (
-    <div className="min-h-screen bg-gray-900">
-      <Header />
-      <BuscarPage />
-    </div>
-  )
-}
