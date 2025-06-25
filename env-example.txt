@@ -1,0 +1,12 @@
+# Copie este conteúdo para o arquivo .env.local
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://mjgqetdjndsfycegaadr.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qZ3FldGRqbmRzZnljZWdhYWRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA1MjYzMzUsImV4cCI6MjA2NjEwMjMzNX0.DKzdmjhgogQWwj0wfQQD5x0Z-M2EWdwwLnVcwhRIo3E
+
+# URL do site para metadados SEO
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+# Service Role Key (obrigatório para operações administrativas)
+# Obtenha esta chave em: https://supabase.com/dashboard/project/[seu-projeto]/settings/api
+SUPABASE_SERVICE_ROLE_KEY=sua_service_role_key_aqui 
