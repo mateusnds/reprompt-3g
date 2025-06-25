@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -13,7 +12,7 @@ import { Search, Star, Download, Eye } from "lucide-react"
 import Link from "next/link"
 import { searchPrompts } from "@/lib/prompts-storage"
 import type { Prompt } from "@/lib/types"
-import { Header } from "@/components/header"
+import Header from "@/components/header"
 
 export default function BuscarPage() {
   const searchParams = useSearchParams()
@@ -78,7 +77,7 @@ export default function BuscarPage() {
         </nav>
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-4">
-            {searchQuery ? `Resultados para "${searchQuery}"` : "Explorar Prompts"}
+            {searchQuery ? `Resultados para "${searchQuery}"` : "Buscar Prompts"}
           </h1>
           <p className="text-gray-400">{loading ? "Buscando..." : `${prompts.length} prompts encontrados`}</p>
         </div>
@@ -136,6 +135,11 @@ export default function BuscarPage() {
                   <SelectItem value="price-high">Maior preço</SelectItem>
                 </SelectContent>
               </Select>
+
+              <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
+                <Search className="w-4 h-4 mr-2" />
+                Buscar
+              </Button>
             </form>
           </CardContent>
         </Card>
@@ -155,7 +159,7 @@ export default function BuscarPage() {
             {prompts.map((prompt) => (
               <Link
                 key={prompt.id}
-                href={`/prompt/${prompt.category}/${prompt.title
+                href={`/prompt/${prompt.category}/${prompt.slug || prompt.title
                   .toLowerCase()
                   .replace(/\s+/g, "-")
                   .replace(/[^\w-]/g, "")}`}
@@ -164,7 +168,7 @@ export default function BuscarPage() {
                   <CardHeader className="p-0">
                     <div className="relative overflow-hidden rounded-t-lg">
                       <img
-                        src={prompt.images[0] || "/placeholder.svg"}
+                        src={prompt.images?.[0] || "/placeholder.jpg"}
                         alt={prompt.title}
                         className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -184,10 +188,10 @@ export default function BuscarPage() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-1">
                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-medium text-white">{prompt.rating.toFixed(1)}</span>
+                        <span className="text-sm font-medium text-white">{prompt.rating?.toFixed(1) || '0.0'}</span>
                       </div>
                       <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                        {prompt.isFree ? "Gratuito" : `R$ ${prompt.price.toFixed(2).replace(".", ",")}`}
+                        {prompt.isFree ? "Gratuito" : `R$ ${prompt.price?.toFixed(2).replace(".", ",") || '0,00'}`}
                       </div>
                     </div>
 
@@ -201,11 +205,11 @@ export default function BuscarPage() {
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-1">
                           <Download className="w-4 h-4" />
-                          <span>{prompt.downloads}</span>
+                          <span>{prompt.downloads || 0}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <Eye className="w-4 h-4" />
-                          <span>{prompt.views}</span>
+                          <span>{prompt.views || 0}</span>
                         </div>
                       </div>
                     </div>
@@ -231,3 +235,4 @@ export default function BuscarPage() {
     </div>
   )
 }
+

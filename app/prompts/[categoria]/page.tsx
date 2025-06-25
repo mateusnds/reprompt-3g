@@ -71,7 +71,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         </Link>
         <span>/</span>
         <Link href="/buscar" className="hover:text-white">
-          Explorar
+          Buscar
         </Link>
         <span>/</span>
         <span className="text-white">{categoryName}</span>

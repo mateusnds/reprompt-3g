@@ -30,8 +30,12 @@ export function Header() {
 
   const navLinks = [
     { href: "/", label: "Início" },
+<<<<<<< HEAD
     { href: "/buscar", label: "Explorar" },
     { href: "/planos", label: "Planos" },
+=======
+    { href: "/buscar", label: "Buscar" },
+>>>>>>> 20052a1a8ab622b1437c0fe222aa5dc24a4fc0ba
     { href: "/blog", label: "Blog" },
     { href: "/faq", label: "FAQ" },
   ]

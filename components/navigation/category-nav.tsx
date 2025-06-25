@@ -1,23 +1,40 @@
 
 "use client"
 
+import { useState, useEffect } from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { getCategories } from "@/lib/database"
+
+interface Category {
+  id: string
+  name: string
+  slug: string
+  count?: number
+}
 
 interface CategoryNavProps {
-  categories: Array<{
-    name: string
-    slug: string
-    count?: number
-  }>
   showCounts?: boolean
 }
 
-export function CategoryNav({ categories, showCounts = false }: CategoryNavProps) {
+export function CategoryNav({ showCounts = false }: CategoryNavProps) {
   const pathname = usePathname()
+  const [categories, setCategories] = useState<Category[]>([])
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const data = await getCategories()
+        setCategories(data)
+      } catch (error) {
+        console.error('Erro ao carregar categorias:', error)
+      }
+    }
+    loadCategories()
+  }, [])
 
   return (
     <div className="bg-gray-800 border-b border-gray-700">

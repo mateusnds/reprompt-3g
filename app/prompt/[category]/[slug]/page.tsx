@@ -30,13 +30,18 @@ export default function PromptPage({ params }: PromptPageProps) {
   const [purchased, setPurchased] = useState(false)
 
   useEffect(() => {
-    const loadPrompt = () => {
-      const foundPrompt = getPromptBySlug(resolvedParams.slug)
-      setPrompt(foundPrompt)
-      setLoading(false)
+    const loadPrompt = async () => {
+      try {
+        const foundPrompt = await getPromptBySlug(resolvedParams.slug)
+        setPrompt(foundPrompt)
+        setLoading(false)
 
-      if (foundPrompt) {
-        incrementViews(foundPrompt.id)
+        if (foundPrompt) {
+          await incrementViews(foundPrompt.id)
+        }
+      } catch (error) {
+        console.error('Erro ao carregar prompt:', error)
+        setLoading(false)
       }
     }
 
@@ -45,7 +50,7 @@ export default function PromptPage({ params }: PromptPageProps) {
 
   const handleCopy = async () => {
     if (prompt) {
-      await navigator.clipboard.writeText(prompt.prompt)
+      await navigator.clipboard.writeText(prompt.content)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }
@@ -120,13 +125,13 @@ export default function PromptPage({ params }: PromptPageProps) {
               {prompt.videoUrl ? (
                 <VideoPreview
                   videoUrl={prompt.videoUrl}
-                  thumbnailUrl={prompt.images?.[0] || "/placeholder.svg"}
+                  thumbnailUrl={prompt.images?.[0] || "/placeholder.jpg"}
                   title={prompt.title}
                   className="w-full h-96"
                 />
               ) : (
                 <img
-                  src={prompt.images?.[0] || "/placeholder.svg"}
+                  src={prompt.images?.[0] || "/placeholder.jpg"}
                   alt={prompt.title}
                   className="w-full h-96 object-cover"
                 />
@@ -203,7 +208,7 @@ export default function PromptPage({ params }: PromptPageProps) {
                 {canViewPrompt ? (
                   <div className="bg-gray-800 p-4 rounded-lg">
                     <code className="text-gray-300 whitespace-pre-wrap font-mono text-sm">
-                      {prompt.prompt}
+                      {prompt.content}
                     </code>
                   </div>
                 ) : (
@@ -213,7 +218,7 @@ export default function PromptPage({ params }: PromptPageProps) {
                     </p>
                     <div className="bg-gray-700 p-3 rounded blur-sm">
                       <code className="text-gray-500 font-mono text-sm">
-                        {prompt.prompt.substring(0, 50)}...
+                        {prompt.content?.substring(0, 50) || ''}...
                       </code>
                     </div>
                   </div>
