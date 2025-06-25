@@ -1,4 +1,3 @@
-
 export interface User {
   id: string
   name: string
@@ -82,6 +81,50 @@ export interface Purchase {
   promptId: string
   price: number
   status: 'completed' | 'pending' | 'cancelled'
+  createdAt: string
+}
+
+// Novos tipos para assinaturas
+export interface SubscriptionPlan {
+  id: string
+  name: string
+  slug: string
+  description: string
+  price: number
+  originalPrice?: number
+  duration: 'monthly' | 'quarterly' | 'annual'
+  durationMonths: number
+  features: string[]
+  isPopular?: boolean
+  isActive: boolean
+  maxPromptsPerMonth?: number
+  discountPercentage?: number
+  createdAt: string
+}
+
+export interface UserSubscription {
+  id: string
+  userId: string
+  planId: string
+  plan: SubscriptionPlan
+  status: 'active' | 'cancelled' | 'expired' | 'pending'
+  startDate: string
+  endDate: string
+  autoRenew: boolean
+  paymentMethod?: string
+  lastPaymentDate?: string
+  nextPaymentDate?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PaymentMethod {
+  id: string
+  userId: string
+  type: 'credit_card' | 'pix' | 'paypal'
+  last4?: string
+  brand?: string
+  isDefault: boolean
   createdAt: string
 }
 

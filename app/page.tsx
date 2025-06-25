@@ -3,6 +3,7 @@ import HeroSection from '@/components/hero-section'
 import FeaturedPrompts from '@/components/featured-prompts'
 import { TrustSignals } from '@/components/trust-signals'
 import { ReviewsSection } from '@/components/reviews-section'
+import PremiumBenefits from '@/components/premium-benefits'
 import Footer from '@/components/footer'
 import Header from '@/components/header'
 import StructuredData from '@/components/structured-data'
@@ -21,6 +22,7 @@ export default function HomePage() {
         <main>
           <HeroSection />
           <FeaturedPrompts />
+          <PremiumBenefits />
           <TrustSignals />
           <ReviewsSection promptId="homepage" promptTitle="RePrompt Platform" />
         </main>

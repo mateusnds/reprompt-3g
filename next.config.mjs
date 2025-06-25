@@ -1,4 +1,3 @@
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
@@ -9,7 +8,26 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
-    domains: ['localhost', 'mjgqetdjndsfycegaadr.supabase.co'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'mjgqetdjndsfycegaadr.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
     formats: ['image/webp', 'image/avif'],
   },
   experimental: {
@@ -21,10 +39,16 @@ const nextConfig = {
         },
       },
     },
+    typedRoutes: true,
   },
   compress: true,
   poweredByHeader: false,
   generateEtags: true,
+  env: {
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+  },
   async headers() {
     return [
       {
@@ -58,8 +82,8 @@ const nextConfig = {
   async redirects() {
     return [
       {
-        source: '/prompts',
-        destination: '/explorar',
+        source: '/home',
+        destination: '/',
         permanent: true,
       },
     ]

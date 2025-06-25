@@ -124,13 +124,20 @@ export default function HeroSection() {
         {/* CTA Section */}
         <div className="text-center mt-16">
           <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 max-w-2xl mx-auto">
-            <h3 className="text-2xl font-bold text-white mb-4">Comece a vender seus prompts hoje</h3>
-            <p className="text-gray-300 mb-6">Junte-se a milhares de criadores que já monetizam sua criatividade.</p>
-            <Link href="/dashboard">
-              <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-8 py-3 rounded-xl">
-                Começar a Vender
-              </Button>
-            </Link>
+            <h3 className="text-2xl font-bold text-white mb-4">Acesso Premium a Todos os Prompts</h3>
+            <p className="text-gray-300 mb-6">Junte-se a milhares de usuários que já têm acesso ilimitado aos melhores prompts de IA.</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/planos">
+                <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-lg px-8 py-3 rounded-xl">
+                  Ver Planos Premium
+                </Button>
+              </Link>
+              <Link href="/dashboard">
+                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 text-lg px-8 py-3 rounded-xl">
+                  Começar a Vender
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>

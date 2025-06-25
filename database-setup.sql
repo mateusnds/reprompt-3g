@@ -1,4 +1,7 @@
 -- Limpar tabelas existentes se necessário
+DROP TABLE IF EXISTS user_subscriptions CASCADE;
+DROP TABLE IF EXISTS subscription_plans CASCADE;
+DROP TABLE IF EXISTS payment_methods CASCADE;
 DROP TABLE IF EXISTS reviews CASCADE;
 DROP TABLE IF EXISTS purchases CASCADE;
 DROP TABLE IF EXISTS prompts CASCADE;
@@ -18,6 +21,51 @@ CREATE TABLE users (
   avatar TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Tabela de planos de assinatura
+CREATE TABLE subscription_plans (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(100) NOT NULL,
+  slug VARCHAR(100) UNIQUE NOT NULL,
+  description TEXT,
+  price DECIMAL(10,2) NOT NULL,
+  original_price DECIMAL(10,2),
+  duration VARCHAR(20) NOT NULL CHECK (duration IN ('monthly', 'quarterly', 'annual')),
+  duration_months INTEGER NOT NULL,
+  features TEXT[] DEFAULT '{}',
+  is_popular BOOLEAN DEFAULT false,
+  is_active BOOLEAN DEFAULT true,
+  max_prompts_per_month INTEGER,
+  discount_percentage INTEGER,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Tabela de assinaturas dos usuários
+CREATE TABLE user_subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  plan_id UUID REFERENCES subscription_plans(id),
+  status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('active', 'cancelled', 'expired', 'pending')),
+  start_date TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  end_date TIMESTAMP WITH TIME ZONE NOT NULL,
+  auto_renew BOOLEAN DEFAULT true,
+  payment_method VARCHAR(50),
+  last_payment_date TIMESTAMP WITH TIME ZONE,
+  next_payment_date TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Tabela de métodos de pagamento
+CREATE TABLE payment_methods (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  type VARCHAR(20) NOT NULL CHECK (type IN ('credit_card', 'pix', 'paypal')),
+  last4 VARCHAR(4),
+  brand VARCHAR(50),
+  is_default BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 -- Tabela de categorias
@@ -248,6 +296,76 @@ INSERT INTO faqs (question, answer, category, order_num) VALUES
 ('Como funciona o RePrompt?', 'O RePrompt é um marketplace onde você pode comprar e vender prompts para inteligência artificial.', 'geral', 1),
 ('Os prompts funcionam mesmo?', 'Sim! Todos os prompts são testados antes de serem publicados.', 'geral', 2),
 ('Posso vender meus prompts?', 'Claro! Cadastre-se e comece a vender seus prompts hoje mesmo.', 'vendas', 3);
+
+-- Inserir planos de assinatura
+INSERT INTO subscription_plans (id, name, slug, description, price, original_price, duration, duration_months, features, is_popular, is_active, max_prompts_per_month, discount_percentage) VALUES
+(
+  '11111111-1111-1111-1111-111111111111',
+  'Plano Mensal',
+  'mensal',
+  'Acesso completo a todos os prompts premium por 1 mês',
+  49.90,
+  49.90,
+  'monthly',
+  1,
+  ARRAY[
+    'Acesso a todos os prompts premium',
+    'Downloads ilimitados',
+    'Suporte prioritário',
+    'Acesso antecipado a novos prompts',
+    'Dashboard de analytics'
+  ],
+  false,
+  true,
+  null,
+  null
+),
+(
+  '22222222-2222-2222-2222-222222222222',
+  'Plano Trimestral',
+  'trimestral',
+  'Acesso completo a todos os prompts premium por 3 meses com desconto',
+  149.70,
+  149.70,
+  'quarterly',
+  3,
+  ARRAY[
+    'Acesso a todos os prompts premium',
+    'Downloads ilimitados',
+    'Suporte prioritário',
+    'Acesso antecipado a novos prompts',
+    'Dashboard de analytics',
+    '15% de desconto no valor total'
+  ],
+  true,
+  true,
+  null,
+  15
+),
+(
+  '33333333-3333-3333-3333-333333333333',
+  'Plano Anual',
+  'anual',
+  'Acesso completo a todos os prompts premium por 12 meses com máximo desconto',
+  499.90,
+  598.80,
+  'annual',
+  12,
+  ARRAY[
+    'Acesso a todos os prompts premium',
+    'Downloads ilimitados',
+    'Suporte prioritário 24/7',
+    'Acesso antecipado a novos prompts',
+    'Dashboard de analytics avançado',
+    '30% de desconto no valor total',
+    '2 meses grátis',
+    'Acesso exclusivo a prompts beta'
+  ],
+  false,
+  true,
+  null,
+  30
+);
 
 -- Criar índices para performance
 CREATE INDEX idx_prompts_category ON prompts(category);
